@@ -1,0 +1,9 @@
+[package]
+name = "li3-2019"
+version = "0.1.0"
+authors = ["Mendess2526 <pedro.mendes.26@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+regex = "*"
+lazy_static = "*"

@@ -61,6 +61,10 @@ impl Sale {
         self.promotion
     }
 
+    pub fn amount(&self) -> u32 {
+        self.amount
+    }
+
     pub fn filial(&self) -> Filial {
         self.filial
     }

@@ -153,4 +153,23 @@ impl Store {
             }
         }
     }
+
+    pub fn year_purchases(&self, client: String) -> Vec<(u32, u32, u32)> {
+        let mut purchases = vec![];
+        for year in self.sales.iter() {
+            let mut one = 0;
+            let mut two = 0;
+            let mut three = 0;
+            for sale in year.iter().filter(|s| s.client() == client) {
+                use self::sale::Filial::*;
+                match sale.filial() {
+                    One => one += sale.amount(),
+                    Two => two += sale.amount(),
+                    Three => three += sale.amount(),
+                }
+            }
+            purchases.push((one, two, three));
+        }
+        purchases
+    }
 }

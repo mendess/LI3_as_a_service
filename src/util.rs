@@ -40,3 +40,9 @@ impl From<u8> for Month {
         }
     }
 }
+
+impl std::fmt::Display for Month {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.as_u8())
+    }
+}

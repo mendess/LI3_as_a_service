@@ -28,7 +28,6 @@ pub struct Sale {
     filial: Filial,
 }
 
-#[allow(dead_code)]
 impl Sale {
     pub fn new(product: String,
                client: String,
@@ -72,5 +71,26 @@ impl Sale {
 
     pub fn price(&self) -> f64 {
         self.price
+    }
+}
+
+impl std::fmt::Display for Sale {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} {} {} {} {} {} {}",
+               self.product, self.price, self.amount, if self.promotion { "P" } else { "N" },
+               self.client, self.month, self.filial)
+    }
+}
+
+impl std::fmt::Display for Filial {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        use self::Filial::*;
+        let to_str = || match self {
+            One => "1",
+            Two => "2",
+            Three => "3",
+            Error => "E",
+        };
+        write!(f, "{}", to_str())
     }
 }

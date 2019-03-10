@@ -11,7 +11,7 @@ use std::collections::hash_map::HashMap;
 use std::collections::btree_map::BTreeMap;
 
 pub struct Store {
-    products: BTreeMap<String, Product>,
+    products: BTreeMap<String, (Product, bool)>,
     clients: HashMap<String, Client>,
     sales: [Vec<Sale>; 12],
 }
@@ -45,7 +45,7 @@ impl Store {
     }
 
     pub fn add_product(&mut self, product: Product) {
-        self.products.insert(String::from(product.id()), product);
+        self.products.insert(String::from(product.id()), (product, false));
     }
 
     pub fn add_client(&mut self, client: Client) {
@@ -56,14 +56,41 @@ impl Store {
         if self.clients.contains_key(sale.client())
             && self.products.contains_key(sale.product())
             {
+                self.products.entry(sale.product().to_string())
+                    .and_modify(|(_, b)| *b = true);
                 self.sales[sale.month() as usize - 1].push(sale);
             }
     }
 
-    pub fn list_by_first_letter(&self, l: char) -> Vec<Product> {
+    pub fn serialize(&self) -> std::io::Result<()> {
+        use std::fs::File;
+        use std::fmt::Write as fmtW;
+        use std::io::Write as ioW;
+        let mut cv = String::new();
+        for c in self.clients.values() {
+            writeln!(cv, "{}", c).unwrap();
+        }
+        let mut f = File::create("db/Clientes_Valid.txt")?;
+        f.write_all(cv.as_bytes())?;
+        let mut pv = String::new();
+        for p in self.products.values() {
+            writeln!(pv, "{}", p.0).unwrap();
+        }
+        let mut f = File::create("db/Produtos_Valid.txt")?;
+        f.write_all(pv.as_bytes())?;
+        let mut sv = String::new();
+        for v in self.sales.iter().flat_map(|x| x.iter()) {
+            writeln!(sv, "{}", v).unwrap();
+        }
+        let mut f = File::create("db/Vendas_1M._Valid.txt")?;
+        f.write_all(sv.as_bytes())?;
+        Ok(())
+    }
+
+    pub fn list_by_first_letter(&self, l: char) -> Vec<&Product> {
         let start = format!("{}{}", l, "A0000").to_uppercase();
         let end = format!("{}{}", l, "Z9999").to_uppercase();
-        self.products.range(start..end).map(|(_,x)| x).cloned().collect()
+        self.products.range(start..end).map(|(_,x)| &x.0).collect()
     }
 
     pub fn total_billed(&self, month: Month, product: String) -> TotalBilled {
@@ -86,5 +113,14 @@ impl Store {
                 };
                 bills
             })
+    }
+
+    pub fn never_bought(&self) -> (usize, Vec<&Product>) {
+        let never_bought = self.products
+            .values()
+            .filter(|(_, sold)| !*sold)
+            .map(|p| &p.0)
+            .collect::<Vec<&Product>>();
+        (never_bought.len(), never_bought)
     }
 }

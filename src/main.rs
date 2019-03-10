@@ -27,5 +27,11 @@ fn main() -> std::io::Result<()> {
     for p in store.buyers_in_all_filials() {
         println!("{}", p);
     }
+    // 6
+    {
+        let buyers = store.n_buyers_without_purchases();
+        let products = store.n_never_bought();
+        println!("clients: {} | products: {}", buyers, products);
+    }
     Ok(())
 }

@@ -132,4 +132,25 @@ impl Store {
             .filter(|c| { let p = c.purchases(); p.0 > 0 && p.1 > 0 && p.2 > 0 })
             .collect()
     }
+
+    pub fn n_buyers_without_purchases(&self) -> usize {
+        self.clients.values()
+            .filter(|c| c.purchases() == (0,0,0))
+            .count()
+    }
+
+    pub fn n_never_bought(&self) -> usize {
+        match self.n_non_bought_products.get() {
+            Some(n) => n,
+            None => {
+                let n = self.products
+                    .values()
+                    .filter(|(_, sold)| !*sold)
+                    .map(|p| &p.0)
+                    .count();
+                self.n_non_bought_products.set(Some(n));
+                n
+            }
+        }
+    }
 }

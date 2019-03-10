@@ -79,5 +79,13 @@ fn main() -> std::io::Result<()> {
         println!("{:?}", store.total_billed_between(Month::from(1), Month::from(3)));
         eprintln!("{:?}", now.elapsed());
     }
+    {// 9
+    }
+    {// 10
+    }
+    {// 11
+    }
+    {// 12
+    }
     Ok(())
 }

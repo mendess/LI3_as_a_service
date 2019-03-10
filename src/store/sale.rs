@@ -2,7 +2,7 @@ use crate::util::Month;
 
 #[derive(Debug,Clone,Copy)]
 pub enum Filial {
-    One, Two, Three, Error
+    One, Two, Three,
 }
 
 impl From<&str> for Filial {
@@ -12,7 +12,7 @@ impl From<&str> for Filial {
             "1" => One,
             "2" => Two,
             "3" => Three,
-            _ => Error,
+            _ => panic!("Invalid filial: {}", s),
         }
     }
 }
@@ -65,12 +65,8 @@ impl Sale {
         self.filial
     }
 
-    pub fn amount(&self) -> u32 {
-        self.amount
-    }
-
-    pub fn price(&self) -> f64 {
-        self.price
+    pub fn total_price(&self) -> f64 {
+        self.price * self.amount as f64
     }
 }
 
@@ -89,7 +85,6 @@ impl std::fmt::Display for Filial {
             One => "1",
             Two => "2",
             Three => "3",
-            Error => "E",
         };
         write!(f, "{}", to_str())
     }

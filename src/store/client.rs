@@ -1,5 +1,10 @@
+use super::sale::Filial;
+
 #[derive(Debug,Clone)]
-pub struct Client(String);
+pub struct Client{
+    id: String,
+    purchases: (u32, u32, u32),
+}
 
 use regex::Regex;
 use lazy_static::lazy_static;
@@ -11,25 +16,38 @@ impl Client {
             static ref re :Regex = Regex::new(r"[A-Z][1-9]\d{3}").unwrap();
         }
         if re.is_match(&code) {
-            Some(Client(code))
+            Some(Client{ id: code, purchases: (0,0,0) })
         } else {
             None
         }
     }
 
     pub fn id(&self) -> &str {
-        &self.0
+        &self.id
+    }
+
+    pub fn make_purchase(&mut self, filial: Filial) {
+        use super::sale::Filial::*;
+        match filial {
+            One => self.purchases.0 += 1,
+            Two => self.purchases.1 += 1,
+            Three => self.purchases.2 += 1,
+        }
+    }
+
+    pub fn purchases(&self) -> (u32, u32, u32) {
+        self.purchases
     }
 }
 
 impl From<&str> for Client {
     fn from(s :&str) -> Self {
-        Client(s.into())
+        Client{ id: s.into(), purchases: (0,0,0) }
     }
 }
 
 impl std::fmt::Display for Client {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.id)
     }
 }

@@ -23,5 +23,9 @@ fn main() -> std::io::Result<()> {
         println!("{}", p.id());
     }
     println!("{}", never_bought.0);
+    // 5
+    for p in store.buyers_in_all_filials() {
+        println!("{}", p);
+    }
     Ok(())
 }

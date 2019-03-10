@@ -7,14 +7,8 @@ use self::client::Client;
 use self::sale::Sale;
 use crate::util::Month;
 
-use std::collections::hash_map::HashMap;
 use std::collections::btree_map::BTreeMap;
-
-pub struct Store {
-    products: BTreeMap<String, (Product, bool)>,
-    clients: HashMap<String, Client>,
-    sales: [Vec<Sale>; 12],
-}
+use std::cell::Cell;
 
 #[derive(Debug)]
 pub struct TotalBilled {
@@ -35,12 +29,20 @@ impl Default for TotalBilled {
     }
 }
 
+pub struct Store {
+    products: BTreeMap<String, (Product, bool)>,
+    clients: BTreeMap<String, Client>,
+    sales: [Vec<Sale>; 12],
+    n_non_bought_products: Cell<Option<usize>>
+}
+
 impl Store {
     pub fn new() -> Self {
         Store {
             products: BTreeMap::new(),
-            clients: HashMap::new(),
+            clients: BTreeMap::new(),
             sales: [vec![], vec![],vec![], vec![], vec![], vec![],vec![], vec![],vec![], vec![],vec![], vec![]],
+            n_non_bought_products: Cell::new(None),
         }
     }
 
@@ -58,6 +60,7 @@ impl Store {
             {
                 self.products.entry(sale.product().to_string())
                     .and_modify(|(_, b)| *b = true);
+                self.clients.get_mut(sale.client()).map(|c| c.make_purchase(sale.filial()));
                 self.sales[sale.month() as usize - 1].push(sale);
             }
     }
@@ -97,10 +100,9 @@ impl Store {
         use self::sale::Filial;
         let f = |sales :&mut (u32, u32 ,u32), bills :&mut (f64, f64, f64), s :&Sale| {
             match s.filial() {
-                Filial::One => { sales.0 += 1; bills.0 += s.price() * s.amount() as f64 },
-                Filial::Two => { sales.1 += 1; bills.1 += s.price() * s.amount() as f64 },
-                Filial::Three => { sales.2 += 1; bills.2 += s.price() * s.amount() as f64 },
-                _ => (),
+                Filial::One => { sales.0 += 1; bills.0 += s.total_price() },
+                Filial::Two => { sales.1 += 1; bills.1 += s.total_price() },
+                Filial::Three => { sales.2 += 1; bills.2 += s.total_price() },
             };
         };
         self.sales[(month.as_u8() - 1) as usize].iter()
@@ -121,6 +123,13 @@ impl Store {
             .filter(|(_, sold)| !*sold)
             .map(|p| &p.0)
             .collect::<Vec<&Product>>();
+        self.n_non_bought_products.set(Some(never_bought.len()));
         (never_bought.len(), never_bought)
+    }
+
+    pub fn buyers_in_all_filials(&self) -> Vec<&Client> {
+        self.clients.values()
+            .filter(|c| { let p = c.purchases(); p.0 > 0 && p.1 > 0 && p.2 > 0 })
+            .collect()
     }
 }

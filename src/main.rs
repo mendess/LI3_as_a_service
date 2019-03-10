@@ -74,5 +74,10 @@ fn main() -> std::io::Result<()> {
         println!("");
         eprintln!("{:?}", now.elapsed());
     }
+    {// 8
+        let now = Instant::now();
+        println!("{:?}", store.total_billed_between(Month::from(1), Month::from(3)));
+        eprintln!("{:?}", now.elapsed());
+    }
     Ok(())
 }

@@ -156,11 +156,11 @@ impl Store {
 
     pub fn year_purchases(&self, client: String) -> Vec<(u32, u32, u32)> {
         let mut purchases = vec![];
-        for year in self.sales.iter() {
+        for month in self.sales.iter() {
             let mut one = 0;
             let mut two = 0;
             let mut three = 0;
-            for sale in year.iter().filter(|s| s.client() == client) {
+            for sale in month.iter().filter(|s| s.client() == client) {
                 use self::sale::Filial::*;
                 match sale.filial() {
                     One => one += sale.amount(),
@@ -171,5 +171,19 @@ impl Store {
             purchases.push((one, two, three));
         }
         purchases
+    }
+
+    pub fn total_billed_between(&self, from: Month, to: Month) -> (usize, f64) {
+        let mut n_sales = 0;
+        let total_sales = self.sales
+            .iter()
+            .skip(from.as_u8() as usize - 1)
+            .take(to.as_u8() as usize - 1)
+            .map(|month| {
+                n_sales += month.len();
+                month.iter().fold(0.0, |acc, s| s.total_price() + acc)
+            })
+        .fold(0.0, |s, acc| s + acc);
+        (n_sales, total_sales)
     }
 }

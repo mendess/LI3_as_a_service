@@ -5,6 +5,17 @@ pub enum Filial {
     One, Two, Three,
 }
 
+impl Filial {
+    pub fn as_u8(self) -> u8 {
+        use self::Filial::*;
+        match self {
+            One => 1,
+            Two => 2,
+            Three => 3,
+        }
+    }
+}
+
 impl From<&str> for Filial {
     fn from(s :&str) -> Self {
         use self::Filial::*;

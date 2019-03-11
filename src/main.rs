@@ -58,18 +58,18 @@ fn main() -> std::io::Result<()> {
         println!("       | Jan | Fev | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dez |");
         println!("-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+");
         print!(  " One   |");
-        for month in table.iter() {
-            print!(" {:3} |", month.0);
+        for month in table.0.iter() {
+            print!(" {:3} |", month);
         }
         println!("");
         print!(  " Two   |");
-        for month in table.iter() {
-            print!(" {:3} |", month.1);
+        for month in table.1.iter() {
+            print!(" {:3} |", month);
         }
         println!("");
         print!(  " Three |");
-        for month in table.iter() {
-            print!(" {:3} |", month.2);
+        for month in table.2.iter() {
+            print!(" {:3} |", month);
         }
         println!("");
         eprintln!("{:?}", now.elapsed());

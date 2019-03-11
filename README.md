@@ -7,6 +7,7 @@
 3. Dado um mês e um código de produto, ambos válidos, determinar e apresentar o número total de vendas (nº de registos de venda) e o total facturado com esse produto em tal mês, distinguindo os totais em modo N e os totais em modo P. O utilizador deverá decidir se pretende o resultado global ou os resultados filial a filial para todas as 3 filiais.
 
 4. Determinar a lista ordenada dos códigos dos produtos (e o seu número total) que ninguém comprou, podendo o utilizador decidir igualmente se pretende valores totais ou divididos pelas filiais.
+Os que ninguem comprou, ninguém comprou na 1 ou na 2 ou na 3
 
 5. Determinar a lista ordenada de códigos de clientes que realizaram compras em todas as filiais;
 

@@ -92,5 +92,6 @@ fn main() -> std::io::Result<()> {
     }
     {// 12
     }
+    panic!("Panic on purpose");
     Ok(())
 }

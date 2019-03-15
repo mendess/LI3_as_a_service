@@ -4,7 +4,7 @@ pub mod sale;
 
 use self::product::Product;
 use self::client::Client;
-use self::sale::Sale;
+use self::sale::{ Sale, Filial };
 use crate::util::Month;
 
 use std::collections::btree_map::BTreeMap;
@@ -101,18 +101,20 @@ impl Store {
     }
 
     pub fn total_billed(&self, month: Month, product: String) -> TotalBilled {
-        let billings = self.sales.iter().map(|filial| {
-            filial[(month.as_u8() - 1) as usize].iter()
-                .filter(|x| x.product() == &product)
-                .fold(((0,0.0),(0,0.0)), |(mut n, mut p), s| {
-                    if s.promotion() {
-                        p.0 += 1; p.1 += s.total_price();
-                    } else {
-                        n.0 += 1; n.1 += s.total_price();
-                    };
-                    (n, p)
-                })
-        }).collect::<Vec<_>>();
+        let billings =
+            self.sales.iter()
+            .map(|filial| {
+                filial[(month.as_u8() - 1) as usize].iter()
+                    .filter(|x| x.product() == &product)
+                    .fold(((0,0.0),(0,0.0)), |(mut n, mut p), s| {
+                        if s.promotion() {
+                            p.0 += 1; p.1 += s.total_price();
+                        } else {
+                            n.0 += 1; n.1 += s.total_price();
+                        };
+                        (n, p)
+                    })
+            }).collect::<Vec<_>>();
         let b1 = billings[0];
         let b2 = billings[1];
         let b3 = billings[2];
@@ -193,5 +195,17 @@ impl Store {
                 )
             .sum();
         (n_sales, total_sales)
+    }
+
+    pub fn product_buyers(&self, cod: &str, filial: Filial, promotion: bool) -> Vec<&str> {
+        use std::collections::HashSet;
+        self.sales[filial.as_u8() as usize - 1].iter()
+            .flat_map(|v| v.iter())
+            .filter(|s| s.promotion() == promotion)
+            .filter(|s| s.product() == cod)
+            .map(|s| s.client())
+            .collect::<HashSet<&str>>()
+            .iter().cloned()
+            .collect()
     }
 }

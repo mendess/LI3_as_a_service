@@ -80,6 +80,11 @@ fn main() -> std::io::Result<()> {
         eprintln!("{:?}", now.elapsed());
     }
     {// 9
+        let now = Instant::now();
+        for p in store.product_buyers("AA1001", store::sale::Filial::One, true) {
+            println!("{}", p);
+        }
+        eprintln!("{:?}", now.elapsed());
     }
     {// 10
     }

@@ -209,6 +209,26 @@ impl Store {
             .collect()
     }
 
+    pub fn top_purchases(&self, client: &str, month: Month) -> Vec<(&Product, u32)> {
+        use std::collections::HashMap;
+        let mut products :HashMap<&str, (&Product, u32)> = HashMap::new();
+        self.sales.iter()
+            .map(|f| &f[month.as_u8() as usize - 1])
+            .flat_map(|x| x.iter())
+            .filter(|p| p.client() == client)
+            .for_each(|s| {
+                println!("{}", s);
+                if let Some(p) = self.products.get(s.product()) {
+                    products.entry(s.product())
+                        .and_modify(|(_, c)| *c += s.amount())
+                        .or_insert((&p.0, s.amount()));
+                }
+            });
+        let mut v = products.values().cloned().collect::<Vec<(&Product, u32)>>();
+        v.sort_unstable_by_key(|p| -1 * p.1 as i32);
+        v
+    }
+
     pub fn top_sold_products(&self, n: usize, sort_by_sales: bool) -> Vec<ProductSales> {
         use std::collections::HashMap;
         let mut table :HashMap<&str, ProductSales> = HashMap::new();

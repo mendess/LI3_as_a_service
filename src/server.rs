@@ -23,7 +23,7 @@ fn index() -> &'static str {
     lixo3 7 <client>
     lixo3 8 <from> <to>
     lixo3 9 <product> <filial> <promotion>
-    lixo3 10
+    lixo3 10 <client> <month>
     lixo3 11 <n>
     lixo3 12
     "
@@ -118,9 +118,14 @@ fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> 
     response
 }
 
-#[get("/10")]
-fn query10(_store: State<Store>) -> String {
-    format!("Not done yet!")
+#[get("/10/<client>/<month>")]
+fn query10(store: State<Store>, client: String, month: u8) -> String {
+    let l = store.top_purchases(&client, Month::from(month));
+    let mut response = String::new();
+    for p in l {
+        response += &format!("{} : {}", p.0, p.1);
+    }
+    response
 }
 
 #[get("/11/<n>")]

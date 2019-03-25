@@ -88,6 +88,11 @@ fn main() -> std::io::Result<()> {
         eprintln!("Query  9: {:?}", now.elapsed());
     }
     {// 10
+        let now = Instant::now();
+        for p in store.top_purchases("A1234", Month::from(1)) {
+            println!("{:?}", p);
+        }
+        eprintln!("Query  10: {:?}", now.elapsed());
     }
     {// 11
         let now = Instant::now();

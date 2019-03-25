@@ -8,7 +8,7 @@ use self::sale::{ Sale, Filial };
 use crate::util::Month;
 
 use std::collections::btree_map::BTreeMap;
-use std::cell::Cell;
+use std::sync::RwLock;
 
 #[derive(Debug)]
 pub struct TotalBilled {
@@ -33,7 +33,7 @@ pub struct Store {
     products: BTreeMap<String, (Product, bool)>,
     clients: BTreeMap<String, Client>,
     sales: [[Vec<Sale>; 12]; 3],
-    n_non_bought_products: Cell<Option<usize>>
+    n_non_bought_products: RwLock<Option<usize>>
 }
 
 impl Store {
@@ -46,7 +46,7 @@ impl Store {
                 [vec![], vec![],vec![], vec![], vec![], vec![],vec![], vec![],vec![], vec![],vec![], vec![]],
                 [vec![], vec![],vec![], vec![], vec![], vec![],vec![], vec![],vec![], vec![],vec![], vec![]],
             ],
-            n_non_bought_products: Cell::new(None),
+            n_non_bought_products: RwLock::new(None),
         }
     }
 
@@ -132,7 +132,7 @@ impl Store {
             .filter(|(_, sold)| !*sold)
             .map(|p| &p.0)
             .collect::<Vec<&Product>>();
-        self.n_non_bought_products.set(Some(never_bought.len()));
+        *self.n_non_bought_products.write().unwrap() = Some(never_bought.len());
         (never_bought.len(), never_bought)
     }
 
@@ -149,7 +149,7 @@ impl Store {
     }
 
     pub fn n_never_bought(&self) -> usize {
-        match self.n_non_bought_products.get() {
+        match *self.n_non_bought_products.read().unwrap() {
             Some(n) => n,
             None => {
                 let n = self.products
@@ -157,7 +157,7 @@ impl Store {
                     .filter(|(_, sold)| !*sold)
                     .map(|p| &p.0)
                     .count();
-                self.n_non_bought_products.set(Some(n));
+                *self.n_non_bought_products.write().unwrap() = Some(n);
                 n
             }
         }

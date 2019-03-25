@@ -9,6 +9,7 @@ mod util;
 use crate::store::Store;
 use crate::util::Month;
 use rocket::Request;
+use rocket::State;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -29,12 +30,8 @@ fn index() -> &'static str {
 }
 
 #[get("/query2/<leter>")]
-fn query2(leter: String) -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
-    let l = store.list_by_first_letter(leter.chars().next().unwrap()); //STORE not in scope
+fn query2(store: State<Store>, leter: String) -> String {
+    let l = store.list_by_first_letter(leter.chars().next().unwrap());
     let mut response = String::new();
     for p in l.iter() {
         response += &format!("{}\n", p);
@@ -43,21 +40,13 @@ fn query2(leter: String) -> String {
 }
 
 #[get("/query3/<month>/<client>")]
-fn query3(month: u8, client: String) -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query3(store: State<Store>, month: u8, client: String) -> String {
     let l = store.total_billed(Month::from(month), client);
     format!("{:#?}", l)
 }
 
 #[get("/query4")]
-fn query4() -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query4(store: State<Store>) -> String {
     let l = store.never_bought();
     let mut response = String::new();
     for p in l.1.iter() {
@@ -68,16 +57,12 @@ fn query4() -> String {
 }
 
 #[get("/query4/<filial>")]
-fn query4_filial(filial: u8) -> String {
+fn query4_filial(_store: State<Store>, filial: u8) -> String {
     format!("Not done yet!\n")
 }
 
 #[get("/query5")]
-fn query5() -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query5(store: State<Store>) -> String {
     let l = store.buyers_in_all_filials();
     let mut response = String::new();
     for p in l.iter() {
@@ -87,22 +72,14 @@ fn query5() -> String {
 }
 
 #[get("/query6")]
-fn query6() -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query6(store: State<Store>) -> String {
     let buyers = store.n_buyers_without_purchases();
     let products = store.n_never_bought();
     format!("clients: {} | products: {}", buyers, products)
 }
 
 #[get("/query7/<client>")]
-fn query7(client: String) -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query7(store: State<Store>, client: String) -> String {
     let table = store.year_purchases(client);
     let mut response = String::new();
     response += "       | Jan | Fev | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dez |\n";
@@ -126,20 +103,12 @@ fn query7(client: String) -> String {
 }
 
 #[get("/query8/<from>/<to>")]
-fn query8(from: u8, to: u8) -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query8(store: State<Store>, from: u8, to: u8) -> String {
     format!("{:?}", store.total_billed_between(Month::from(from), Month::from(to)))
 }
 
 #[get("/query9/<product>/<filial>/<promotion>")]
-fn query9(product: String, filial: u8, promotion: bool) -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> String {
     let l = store.product_buyers(&product, store::sale::Filial::from(filial), promotion);
     let mut response = String::new();
     for p in l.iter() {
@@ -149,16 +118,12 @@ fn query9(product: String, filial: u8, promotion: bool) -> String {
 }
 
 #[get("/query10")]
-fn query10() -> String {
+fn query10(_store: State<Store>) -> String {
     format!("Not done yet!")
 }
 
 #[get("/query11/<n>")]
-fn query11(n: usize) -> String {
-    let mut store = Store::new();
-    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+fn query11(store: State<Store>, n: usize) -> String {
     let l = store.top_sold_products(n, false);
     let mut response = String::new();
     for p in l.iter() {
@@ -167,18 +132,26 @@ fn query11(n: usize) -> String {
     format!("{}", response)
 }
 
+#[get("/query12")]
+fn query12(_store: State<Store>) -> String {
+    format!("Not done yet!\n")
+}
+
 #[catch(404)]
 fn catch404(_req: &Request) -> String {
     format!("Not a valid query!")
 }
 
-#[get("/query12")]
-fn query12() -> String {
-    format!("Not done yet!\n")
-}
-
 fn main() -> std::io::Result<()>{
-    rocket::ignite().mount("/", routes![index,query2,query3,query4,query5,query6,query7,query8,query9,query10,query11,query12]).register(catchers![catch404]).launch();
+    let mut store = Store::new();
+    parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
+    parse::load_products("./db/Produtos.txt", &mut store).unwrap();
+    parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
+    rocket::ignite()
+        .mount("/", routes![index,query2,query3,query4,query5,query6,query7,query8,query9,query10,query11,query12])
+        .register(catchers![catch404])
+        .manage(store)
+        .launch();
     Ok(())
 }
 

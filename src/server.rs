@@ -107,7 +107,7 @@ fn query7(client: String) -> String {
     let mut response = String::new();
     response += "       | Jan | Fev | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dez |\n";
     response += "-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+\n";
-    response +=  " One   |\n";
+    response += " One   |";
     for month in table.0.iter() {
         response += &format!(" {:3} |", month);
     }

@@ -10,6 +10,24 @@ use crate::store::Store;
 use crate::util::Month;
 use rocket::Request;
 
+#[get("/")]
+fn index() -> &'static str {
+"   Welcome to the LI3 API!
+    /query2/<leter>
+    /query3/<month>/<client>
+    /query4
+    /query4/<filial>
+    /query5
+    /query6
+    /query7/<client>
+    /query8/<from>/<to>
+    /query9/<product>/<filial>/<promotion>
+    /query10
+    /query11/<n>
+    /query12
+    "
+}
+
 #[get("/query2/<leter>")]
 fn query2(leter: String) -> String {
     let mut store = Store::new();
@@ -45,19 +63,14 @@ fn query4() -> String {
     for p in l.1.iter() {
         response += &format!("{}\n", p);
     }
-    response += &format!("{}\n", l.0);
+    response += &format!("TOTAL: {}\n", l.0);
     format!("{}", response)
 }
 
-// #[get("/query4/<filial>")]
-// fn query4_filial(filial: u8) -> String {
-//     let mut store = Store::new();
-//     parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
-//     parse::load_products("./db/Produtos.txt", &mut store).unwrap();
-//     parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
-//     let l = store.never_bought_filial(filial);
-//     format!("{:?}", l)
-// }
+#[get("/query4/<filial>")]
+fn query4_filial(filial: u8) -> String {
+    format!("Not done yet!\n")
+}
 
 #[get("/query5")]
 fn query5() -> String {
@@ -165,7 +178,7 @@ fn query12() -> String {
 }
 
 fn main() -> std::io::Result<()>{
-    rocket::ignite().mount("/", routes![query2,query3,query4,query5,query6,query7,query8,query9,query10,query11,query12]).register(catchers![catch404]).launch();
+    rocket::ignite().mount("/", routes![index,query2,query3,query4,query5,query6,query7,query8,query9,query10,query11,query12]).register(catchers![catch404]).launch();
     Ok(())
 }
 

@@ -14,18 +14,18 @@ use rocket::State;
 #[get("/")]
 fn index() -> &'static str {
 "   Welcome to the LI3 API!
-    /2/<leter>
-    /3/<month>/<client>
-    /4
-    /4/<filial>
-    /5
-    /6
-    /7/<client>
-    /8/<from>/<to>
-    /9/<product>/<filial>/<promotion>
-    /10
-    /11/<n>
-    /12
+    lixo3 2 <leter>
+    lixo3 3 <month> <client>
+    lixo3 4
+    lixo3 4 <filial>
+    lixo3 5
+    lixo3 6
+    lixo3 7 <client>
+    lixo3 8 <from> <to>
+    lixo3 9 <product> <filial> <promotion>
+    lixo3 10
+    lixo3 11 <n>
+    lixo3 12
     "
 }
 
@@ -36,7 +36,8 @@ fn query2(store: State<Store>, leter: String) -> String {
     for p in l.iter() {
         response += &format!("{}\n", p);
     }
-    format!("{}", response)
+    response += &format!("TOTAL: {}", l.len());
+    response
 }
 
 #[get("/3/<month>/<client>")]
@@ -53,7 +54,7 @@ fn query4(store: State<Store>) -> String {
         response += &format!("{}\n", p);
     }
     response += &format!("TOTAL: {}\n", l.0);
-    format!("{}", response)
+    response
 }
 
 #[get("/4/<filial>")]
@@ -68,7 +69,7 @@ fn query5(store: State<Store>) -> String {
     for p in l.iter() {
         response += &format!("{}\n", p);
     }
-    format!("{}", response)
+    response
 }
 
 #[get("/6")]
@@ -114,7 +115,7 @@ fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> 
     for p in l.iter() {
         response += &format!("{}\n", p);
     }
-    format!("{}", response)
+    response
 }
 
 #[get("/10")]
@@ -129,7 +130,7 @@ fn query11(store: State<Store>, n: usize) -> String {
     for p in l.iter() {
         response += &format!("{:?}\n", p);
     }
-    format!("{}", response)
+    response
 }
 
 #[get("/12")]
@@ -139,7 +140,7 @@ fn query12(_store: State<Store>) -> String {
 
 #[catch(404)]
 fn catch404(_req: &Request) -> String {
-    format!("Not a valid !")
+    format!("Not a valid query!")
 }
 
 fn main() -> std::io::Result<()>{

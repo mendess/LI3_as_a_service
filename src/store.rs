@@ -30,7 +30,7 @@ impl Default for TotalBilled {
 }
 
 pub struct Store {
-    products: BTreeMap<String, (Product, bool)>,
+    products: BTreeMap<String, (Product, bool, bool, bool, bool)>,
     clients: BTreeMap<String, Client>,
     sales: [[Vec<Sale>; 12]; 3],
     n_non_bought_products: RwLock<Option<usize>>
@@ -51,7 +51,7 @@ impl Store {
     }
 
     pub fn add_product(&mut self, product: Product) {
-        self.products.insert(String::from(product.id()), (product, false));
+        self.products.insert(String::from(product.id()), (product, false, false, false, false));
     }
 
     pub fn add_client(&mut self, client: Client) {
@@ -63,7 +63,10 @@ impl Store {
             && self.products.contains_key(sale.product())
             {
                 self.products.entry(sale.product().to_string())
-                    .and_modify(|(_, b)| *b = true);
+                    .and_modify(|p| p.1 = true)
+                    .and_modify(|p| if !p.2 { p.2 = sale.filial() == Filial::One })
+                    .and_modify(|p| if !p.3 { p.3 = sale.filial() == Filial::Two })
+                    .and_modify(|p| if !p.4 { p.4 = sale.filial() == Filial::Three });
                 self.clients.get_mut(sale.client()).map(|c| c.make_purchase(sale.filial()));
                 self.sales[sale.filial().as_u8() as usize - 1][sale.month().as_u8() as usize - 1].push(sale);
             }
@@ -129,8 +132,23 @@ impl Store {
     pub fn never_bought(&self) -> (usize, Vec<&Product>) {
         let never_bought = self.products
             .values()
-            .filter(|(_, sold)| !*sold)
+            .filter(|(_, sold,_,_,_)| !*sold)
             .map(|p| &p.0)
+            .collect::<Vec<&Product>>();
+        *self.n_non_bought_products.write().unwrap() = Some(never_bought.len());
+        (never_bought.len(), never_bought)
+    }
+
+    pub fn never_bought_filial(&self, filial: Filial) -> (usize, Vec<&Product>) {
+        let never_bought = self.products
+            .values()
+            .filter(|p|
+                    match filial {
+                        Filial::One =>  !p.2,
+                        Filial::Two =>  !p.3,
+                        Filial::Three => !p.4,
+                    })
+        .map(|p| &p.0)
             .collect::<Vec<&Product>>();
         *self.n_non_bought_products.write().unwrap() = Some(never_bought.len());
         (never_bought.len(), never_bought)
@@ -154,7 +172,7 @@ impl Store {
             None => {
                 let n = self.products
                     .values()
-                    .filter(|(_, sold)| !*sold)
+                    .filter(|(_, sold, _, _, _)| !*sold)
                     .map(|p| &p.0)
                     .count();
                 *self.n_non_bought_products.write().unwrap() = Some(n);

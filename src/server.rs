@@ -58,8 +58,14 @@ fn query4(store: State<Store>) -> String {
 }
 
 #[get("/4/<filial>")]
-fn query4_filial(_store: State<Store>, filial: u8) -> String {
-    format!("Not done yet!\n")
+fn query4_filial(store: State<Store>, filial: u8) -> String {
+    let l = store.never_bought_filial(store::sale::Filial::from(filial));
+    let mut response = String::new();
+    for p in l.1.iter() {
+        response += &format!("{}\n", p);
+    }
+    response += &format!("TOTAL: {}\n", l.0);
+    response
 }
 
 #[get("/5")]
@@ -154,7 +160,7 @@ fn main() -> std::io::Result<()>{
     parse::load_products("./db/Produtos.txt", &mut store).unwrap();
     parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
     rocket::ignite()
-        .mount("/", routes![index,query2,query3,query4,query5,query6,query7,query8,query9,query10,query11,query12])
+        .mount("/", routes![index,query2,query3,query4,query4_filial,query5,query6,query7,query8,query9,query10,query11,query12])
         .register(catchers![catch404])
         .manage(store)
         .launch();

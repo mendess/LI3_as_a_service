@@ -15,19 +15,20 @@ fn main() -> std::io::Result<()> {
         parse::load_products("./db/Produtos.txt", &mut store)?;
         parse::load_sales("./db/Vendas_1M.txt", &mut store)?;
         store.serialize()?;
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  1: {:?}", now.elapsed());
     }
     {// 2
         let now = Instant::now();
-        for p in store.list_by_first_letter('b').iter() {
+        let list = store.list_by_first_letter('a');
+        eprintln!("Query  2: {:?}", now.elapsed());
+        for p in list.iter() {
             println!("{}", p);
         }
-        eprintln!("{:?}", now.elapsed());
     }
     { // 3
         let now = Instant::now();
         println!("{:#?}", store.total_billed(Month::from(10), "CC1684".to_string()));
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  3: {:?}", now.elapsed());
     }
     {// 4
         let now = Instant::now();
@@ -36,21 +37,21 @@ fn main() -> std::io::Result<()> {
             println!("{}", p.id());
         }
         println!("{}", never_bought.0);
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  4: {:?}", now.elapsed());
     }
     {// 5
         let now = Instant::now();
         for p in store.buyers_in_all_filials() {
             println!("{}", p);
         }
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  5: {:?}", now.elapsed());
     }
     {// 6
         let now = Instant::now();
         let buyers = store.n_buyers_without_purchases();
         let products = store.n_never_bought();
         println!("clients: {} | products: {}", buyers, products);
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  6: {:?}", now.elapsed());
     }
     {//7
         let now = Instant::now();
@@ -72,23 +73,28 @@ fn main() -> std::io::Result<()> {
             print!(" {:3} |", month);
         }
         println!("");
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  7: {:?}", now.elapsed());
     }
     {// 8
         let now = Instant::now();
         println!("{:?}", store.total_billed_between(Month::from(1), Month::from(3)));
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  8: {:?}", now.elapsed());
     }
     {// 9
         let now = Instant::now();
         for p in store.product_buyers("AA1001", store::sale::Filial::One, true) {
             println!("{}", p);
         }
-        eprintln!("{:?}", now.elapsed());
+        eprintln!("Query  9: {:?}", now.elapsed());
     }
     {// 10
     }
     {// 11
+        let now = Instant::now();
+        for ps in store.top_sold_products(10, false) {
+            println!("{:?}", ps);
+        }
+        eprintln!("Query 11: {:?}", now.elapsed());
     }
     {// 12
     }

@@ -208,4 +208,53 @@ impl Store {
             .iter().cloned()
             .collect()
     }
+
+    pub fn top_sold_products(&self, n: usize, sort_by_sales: bool) -> Vec<ProductSales> {
+        use std::collections::HashMap;
+        let mut table :HashMap<&str, ProductSales> = HashMap::new();
+        for s in self.sales.iter().flat_map(|x| x.iter()).flat_map(|x| x.iter()) {
+            table.entry(s.product())
+                .and_modify(|ps| ps.n_buyers += 1)
+                .and_modify(|ps| if s.filial() == Filial::One { ps.n_sold_f1 += s.amount() })
+                .and_modify(|ps| if s.filial() == Filial::Two { ps.n_sold_f2 += s.amount() })
+                .and_modify(|ps| if s.filial() == Filial::Three { ps.n_sold_f3 += s.amount() })
+                .and_modify(|ps| ps.n_sales_f1 += (s.filial() == Filial::One) as u32)
+                .and_modify(|ps| ps.n_sales_f2 += (s.filial() == Filial::Two) as u32)
+                .and_modify(|ps| ps.n_sales_f3 += (s.filial() == Filial::Three) as u32)
+                .or_insert(ProductSales {
+                    code: s.product().to_string(),
+                    n_buyers: 1,
+                    n_sold_f1: (s.filial() == Filial::One) as u32,
+                    n_sold_f2: (s.filial() == Filial::Two) as u32,
+                    n_sold_f3: (s.filial() == Filial::Three) as u32,
+                    n_sales_f1: (s.filial() == Filial::One) as u32,
+                    n_sales_f2: (s.filial() == Filial::Two) as u32,
+                    n_sales_f3: (s.filial() == Filial::Three) as u32,
+                });
+        }
+        let mut pss = table.into_iter().map(|ps| ps.1).collect::<Vec<_>>();
+        if sort_by_sales {
+            pss.sort_unstable_by_key(
+                |ps| -1 * (ps.n_sales_f1 + ps.n_sales_f2 + ps.n_sales_f3) as i32
+                );
+        } else {
+            pss.sort_unstable_by_key(
+                |ps| -1 * (ps.n_sold_f1 + ps.n_sold_f2 + ps.n_sold_f3) as i32
+                );
+        }
+        pss.iter().take(n).cloned().collect()
+    }
+}
+
+// N mais vendidos
+#[derive(Debug,Clone)]
+pub struct ProductSales {
+    code: String,
+    n_buyers: usize,
+    n_sold_f1: u32,
+    n_sold_f2: u32,
+    n_sold_f3: u32,
+    n_sales_f1: u32,
+    n_sales_f2: u32,
+    n_sales_f3: u32,
 }

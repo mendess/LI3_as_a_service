@@ -1,6 +1,6 @@
 use crate::util::Month;
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,Clone,Copy,PartialEq,Eq)]
 pub enum Filial {
     One, Two, Three,
 }
@@ -23,6 +23,18 @@ impl From<&str> for Filial {
             "1" => One,
             "2" => Two,
             "3" => Three,
+            _ => panic!("Invalid filial: {}", s),
+        }
+    }
+}
+
+impl From<u8> for Filial {
+    fn from(s :u8) -> Self {
+        use self::Filial::*;
+        match s {
+            1 => One,
+            2 => Two,
+            3 => Three,
             _ => panic!("Invalid filial: {}", s),
         }
     }

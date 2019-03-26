@@ -235,7 +235,6 @@ impl Store {
             .flat_map(|x| x.iter())
             .filter(|p| p.client() == client)
             .for_each(|s| {
-                println!("{}", s);
                 if let Some(p) = self.products.get(s.product()) {
                     products.entry(s.product())
                         .and_modify(|(_, c)| *c += s.amount())

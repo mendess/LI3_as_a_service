@@ -25,7 +25,7 @@ fn index() -> &'static str {
     lixo3 9 <product> <filial> <promotion>
     lixo3 10 <client> <month>
     lixo3 11 <n>
-    lixo3 12
+    lixo3 12 <client>
     "
 }
 

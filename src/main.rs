@@ -102,6 +102,14 @@ fn main() -> std::io::Result<()> {
         eprintln!("Query 11: {:?}", now.elapsed());
     }
     {// 12
+        let now = Instant::now();
+        let l = store.top_expense("A1234");
+        let mut response = String::new();
+        if let Some(p) = l.0 { response += &format!("{}\n", p); }
+        if let Some(p) = l.1 { response += &format!("{}\n", p); }
+        if let Some(p) = l.2 { response += &format!("{}\n", p); }
+        print!("{}", response);
+        eprintln!("Query 11: {:?}", now.elapsed());
     }
     Ok(())
 }

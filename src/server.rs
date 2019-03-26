@@ -144,9 +144,14 @@ fn query11(store: State<Store>, n: usize) -> String {
     response
 }
 
-#[get("/12")]
-fn query12(_store: State<Store>) -> String {
-    format!("Not done yet!\n")
+#[get("/12/<client>")]
+fn query12(store: State<Store>, client: String) -> String {
+    let l = store.top_expense(&client);
+    let mut response = String::new();
+    if let Some(p) = l.0 { response += &format!("{}\n", p); }
+    if let Some(p) = l.1 { response += &format!("{}\n", p); }
+    if let Some(p) = l.2 { response += &format!("{}\n", p); }
+    response
 }
 
 #[catch(404)]

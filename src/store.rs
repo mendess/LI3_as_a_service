@@ -282,7 +282,44 @@ impl Store {
         }
         pss.iter().take(n).cloned().collect()
     }
+
+    pub fn top_expense(&self, client: &str) -> (Option<Expense>, Option<Expense>, Option<Expense>) {
+        use std::collections::{HashMap, BinaryHeap};
+        let mut products :HashMap<&str,f64>= HashMap::new();
+        self.sales.iter().flat_map(|x| x.iter()).flat_map(|x| x.iter())
+            .filter(|s| s.client() == client)
+            .for_each(|s| {
+                products.entry(s.product())
+                    .and_modify(|c| *c += s.total_price())
+                    .or_insert(s.total_price());
+            });
+        let mut heap = products.into_iter()
+            .map(|(prod,total)| Expense(total, prod))
+            .collect::<BinaryHeap<_>>();
+        let p1 = heap.pop().map(|e| e);
+        let p2 = heap.pop().map(|e| e);
+        let p3 = heap.pop().map(|e| e);
+        (p1, p2, p3)
+    }
 }
+
+#[derive(PartialEq, PartialOrd)]
+pub struct Expense<'a>(f64,&'a str);
+
+impl<'a> Eq for Expense<'a> {}
+
+impl<'a> Ord for Expense<'a> {
+    fn cmp(&self, other: &Expense<'a>) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl<'a> std::fmt::Display for Expense<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} : {}", self.1, self.0)
+    }
+}
+
 
 // N mais vendidos
 #[derive(Debug,Clone)]

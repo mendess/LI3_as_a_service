@@ -31,6 +31,7 @@ fn index() -> &'static str {
 
 #[get("/2/<leter>")]
 fn query2(store: State<Store>, leter: String) -> String {
+    eprintln!("Running query2/{}", leter);
     let l = store.list_by_first_letter(leter.chars().next().unwrap());
     let mut response = String::new();
     for p in l.iter() {
@@ -42,12 +43,14 @@ fn query2(store: State<Store>, leter: String) -> String {
 
 #[get("/3/<month>/<client>")]
 fn query3(store: State<Store>, month: u8, client: String) -> String {
+    eprintln!("Running query3/{}/{}", month, client);
     let l = store.total_billed(Month::from(month), client);
     format!("{:#?}", l)
 }
 
 #[get("/4")]
 fn query4(store: State<Store>) -> String {
+    eprintln!("Running query4");
     let l = store.never_bought();
     let mut response = String::new();
     for p in l.1.iter() {
@@ -59,6 +62,7 @@ fn query4(store: State<Store>) -> String {
 
 #[get("/4/<filial>")]
 fn query4_filial(store: State<Store>, filial: u8) -> String {
+    eprintln!("Running query4/{}", filial);
     let l = store.never_bought_filial(store::sale::Filial::from(filial));
     let mut response = String::new();
     for p in l.1.iter() {
@@ -70,6 +74,7 @@ fn query4_filial(store: State<Store>, filial: u8) -> String {
 
 #[get("/5")]
 fn query5(store: State<Store>) -> String {
+    eprintln!("Running query5");
     let l = store.buyers_in_all_filials();
     let mut response = String::new();
     for p in l.iter() {
@@ -87,6 +92,7 @@ fn query6(store: State<Store>) -> String {
 
 #[get("/7/<client>")]
 fn query7(store: State<Store>, client: String) -> String {
+    eprintln!("Running query7/{}", client);
     let table = store.year_purchases(client);
     let mut response = String::new();
     response += "       | Jan | Fev | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dez |\n";
@@ -111,11 +117,13 @@ fn query7(store: State<Store>, client: String) -> String {
 
 #[get("/8/<from>/<to>")]
 fn query8(store: State<Store>, from: u8, to: u8) -> String {
+    eprintln!("Running query8/{}/{}", from, to);
     format!("{:?}", store.total_billed_between(Month::from(from), Month::from(to)))
 }
 
 #[get("/9/<product>/<filial>/<promotion>")]
 fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> String {
+    eprintln!("Running query9/{}/{}/{}", product, filial, promotion);
     let l = store.product_buyers(&product, store::sale::Filial::from(filial), promotion);
     let mut response = String::new();
     for p in l.iter() {
@@ -126,6 +134,7 @@ fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> 
 
 #[get("/10/<client>/<month>")]
 fn query10(store: State<Store>, client: String, month: u8) -> String {
+    eprintln!("Running query10/{}/{}", client, month);
     let l = store.top_purchases(&client, Month::from(month));
     let mut response = String::new();
     for p in l {
@@ -136,6 +145,7 @@ fn query10(store: State<Store>, client: String, month: u8) -> String {
 
 #[get("/11/<n>")]
 fn query11(store: State<Store>, n: usize) -> String {
+    eprintln!("Running query11/{}", n);
     let l = store.top_sold_products(n, false);
     let mut response = String::new();
     for p in l.iter() {
@@ -146,6 +156,7 @@ fn query11(store: State<Store>, n: usize) -> String {
 
 #[get("/12/<client>")]
 fn query12(store: State<Store>, client: String) -> String {
+    eprintln!("Running query12/{}", client);
     let l = store.top_expense(&client);
     let mut response = String::new();
     if let Some(p) = l.0 { response += &format!("{}\n", p); }

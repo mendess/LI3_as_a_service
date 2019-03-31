@@ -7,9 +7,62 @@ mod parse;
 mod util;
 
 use crate::store::Store;
+use crate::store::sale::Filial;
 use crate::util::Month;
 use rocket::Request;
 use rocket::State;
+use rocket::request::FromParam;
+use rocket::http::RawStr;
+
+#[derive(Debug)]
+struct MonthWrapper(Month);
+
+impl<'r> FromParam<'r> for MonthWrapper {
+    type Error = &'r RawStr;
+
+    fn from_param(param: &'r RawStr) -> Result<Self, Self::Error> {
+        let number = match param.as_str().parse::<u8>() {
+            Err(_) => return Err(param),
+            Ok(n) => n,
+        };
+        if number > 0 && number < 13 {
+            Ok(MonthWrapper(Month::from(number)))
+        } else {
+            Err(param)
+        }
+    }
+}
+
+impl Into<Month> for MonthWrapper {
+    fn into(self: MonthWrapper) -> Month {
+        self.0
+    }
+}
+
+#[derive(Debug)]
+struct FilialWrapper(Filial);
+
+impl<'r> FromParam<'r> for FilialWrapper {
+    type Error = &'r RawStr;
+
+    fn from_param(param: &'r RawStr) -> Result<Self, Self::Error> {
+        let number = match param.as_str().parse::<u8>() {
+            Err(_) => return Err(param),
+            Ok(n) => n,
+        };
+        if number > 0 && number < 4 {
+            Ok(FilialWrapper(Filial::from(number)))
+        } else {
+            Err(param)
+        }
+    }
+}
+
+impl Into<Filial> for FilialWrapper {
+    fn into(self: FilialWrapper) -> Filial {
+        self.0
+    }
+}
 
 #[get("/")]
 fn index() -> &'static str {
@@ -42,9 +95,9 @@ fn query2(store: State<Store>, leter: String) -> String {
 }
 
 #[get("/3/<month>/<client>")]
-fn query3(store: State<Store>, month: u8, client: String) -> String {
-    eprintln!("Running query3/{}/{}", month, client);
-    let l = store.total_billed(Month::from(month), client);
+fn query3(store: State<Store>, month: MonthWrapper, client: String) -> String {
+    eprintln!("Running query3/{}/{}", month.0, client);
+    let l = store.total_billed(month.into(), client);
     format!("{:#?}", l)
 }
 
@@ -61,9 +114,9 @@ fn query4(store: State<Store>) -> String {
 }
 
 #[get("/4/<filial>")]
-fn query4_filial(store: State<Store>, filial: u8) -> String {
-    eprintln!("Running query4/{}", filial);
-    let l = store.never_bought_filial(store::sale::Filial::from(filial));
+fn query4_filial(store: State<Store>, filial: FilialWrapper) -> String {
+    eprintln!("Running query4/{}", filial.0);
+    let l = store.never_bought_filial(filial.into());
     let mut response = String::new();
     for p in l.1.iter() {
         response += &format!("{}\n", p);
@@ -116,15 +169,15 @@ fn query7(store: State<Store>, client: String) -> String {
 }
 
 #[get("/8/<from>/<to>")]
-fn query8(store: State<Store>, from: u8, to: u8) -> String {
-    eprintln!("Running query8/{}/{}", from, to);
-    format!("{:?}", store.total_billed_between(Month::from(from), Month::from(to)))
+fn query8(store: State<Store>, from: MonthWrapper, to: MonthWrapper) -> String {
+    eprintln!("Running query8/{}/{}", from.0, to.0);
+    format!("{:?}", store.total_billed_between(from.into(), to.into()))
 }
 
 #[get("/9/<product>/<filial>/<promotion>")]
-fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> String {
-    eprintln!("Running query9/{}/{}/{}", product, filial, promotion);
-    let l = store.product_buyers(&product, store::sale::Filial::from(filial), promotion);
+fn query9(store: State<Store>, product: String, filial: FilialWrapper, promotion: bool) -> String {
+    eprintln!("Running query9/{}/{}/{}", product, filial.0, promotion);
+    let l = store.product_buyers(&product, filial.into(), promotion);
     let mut response = String::new();
     for p in l.iter() {
         response += &format!("{}\n", p);
@@ -133,9 +186,9 @@ fn query9(store: State<Store>, product: String, filial: u8, promotion: bool) -> 
 }
 
 #[get("/10/<client>/<month>")]
-fn query10(store: State<Store>, client: String, month: u8) -> String {
-    eprintln!("Running query10/{}/{}", client, month);
-    let l = store.top_purchases(&client, Month::from(month));
+fn query10(store: State<Store>, client: String, month: MonthWrapper) -> String {
+    eprintln!("Running query10/{}/{}", client, month.0);
+    let l = store.top_purchases(&client, month.into());
     let mut response = String::new();
     for p in l {
         response += &format!("{} : {}", p.0, p.1);

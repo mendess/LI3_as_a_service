@@ -67,18 +67,21 @@ impl Into<Filial> for FilialWrapper {
 #[get("/")]
 fn index() -> &'static str {
 "   Welcome to the LI3 API!
-    lixo3 2 <leter>
-    lixo3 3 <month> <client>
-    lixo3 4
-    lixo3 4 <filial>
-    lixo3 5
-    lixo3 6
-    lixo3 7 <client>
-    lixo3 8 <from> <to>
-    lixo3 9 <product> <filial> <promotion>
-    lixo3 10 <client> <month>
-    lixo3 11 <n>
-    lixo3 12 <client>
+    command 2 <leter>
+    command 3 <month> <client>
+    command 4
+    command 4 <filial>
+    command 5
+    command 6
+    command 7 <client>
+    command 8 <from> <to>
+    command 9 <product> <filial> <promotion>
+    command 10 <client> <month>
+    command 11 <n>
+    command 12 <client>
+
+    Notes:
+    <promotion> is 'true' or 'false'
     "
 }
 

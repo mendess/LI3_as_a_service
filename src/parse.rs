@@ -2,12 +2,13 @@ use crate::store::Store;
 use crate::store::product::Product;
 use crate::store::client::Client;
 use crate::store::sale::Sale;
+use crate::store::sale::Filial;
 
 use std::fs::File;
-use std::io::{self, BufReader, BufRead};
+use std::io::{BufReader, BufRead, Result, Error, ErrorKind};
 
 #[allow(dead_code)]
-pub fn load_products(file: &str, store: &mut Store) -> io::Result<()> {
+pub fn load_products(file: &str, store: &mut Store) -> Result<()> {
     let file = BufReader::new(File::open(file)?);
     for line in file.lines().filter_map(|x| x.ok()) {
         if let Some(c) = Product::new(line) {
@@ -18,7 +19,7 @@ pub fn load_products(file: &str, store: &mut Store) -> io::Result<()> {
 }
 
 #[allow(dead_code)]
-pub fn load_clients(file: &str, store: &mut Store) -> io::Result<()> {
+pub fn load_clients(file: &str, store: &mut Store) -> Result<()> {
     let file = BufReader::new(File::open(file)?);
     for line in file.lines().filter_map(|x| x.ok()) {
         if let Some(c) = Client::new(line) {
@@ -29,7 +30,7 @@ pub fn load_clients(file: &str, store: &mut Store) -> io::Result<()> {
 }
 
 #[allow(dead_code)]
-pub fn load_sales(file: &str, store: &mut Store) -> io::Result<()> {
+pub fn load_sales(file: &str, store: &mut Store) -> Result<()> {
     let file = BufReader::new(File::open(file)?);
     for line in file.lines().filter_map(|x| x.ok()) {
         let mut l = line.split_whitespace();
@@ -39,7 +40,7 @@ pub fn load_sales(file: &str, store: &mut Store) -> io::Result<()> {
         let sale = l.next().unwrap() == "P";
         let client = l.next().unwrap().into();
         let mes = l.next().map(|x| x.parse::<u8>().unwrap()).unwrap();
-        let filial = l.next().unwrap().into();
+        let filial = Filial::from_str(l.next().unwrap()).ok_or(Error::new(ErrorKind::Other,"Invalid Filial"))?;
         if let Some(s) = Sale::new(product, client, preco, quant, sale, mes, filial) {
             store.add_sale(s);
         }

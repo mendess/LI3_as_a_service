@@ -27,7 +27,7 @@ fn main() -> std::io::Result<()> {
     }
     { // 3
         let now = Instant::now();
-        println!("{:#?}", store.total_billed(Month::from(10), "CC1684".to_string()));
+        println!("{:#?}", store.total_billed(Month::from(10).unwrap(), "CC1684".to_string()));
         eprintln!("Query  3: {:?}", now.elapsed());
     }
     {// 4
@@ -77,7 +77,7 @@ fn main() -> std::io::Result<()> {
     }
     {// 8
         let now = Instant::now();
-        println!("{:?}", store.total_billed_between(Month::from(1), Month::from(3)));
+        println!("{:?}", store.total_billed_between(Month::from(1).unwrap(), Month::from(3).unwrap()));
         eprintln!("Query  8: {:?}", now.elapsed());
     }
     {// 9
@@ -89,7 +89,7 @@ fn main() -> std::io::Result<()> {
     }
     {// 10
         let now = Instant::now();
-        for p in store.top_purchases("A1234", Month::from(1)) {
+        for p in store.top_purchases("A1234", Month::from(1).unwrap()) {
             println!("{:?}", p);
         }
         eprintln!("Query  10: {:?}", now.elapsed());

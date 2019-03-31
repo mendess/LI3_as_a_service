@@ -25,8 +25,8 @@ impl<'r> FromParam<'r> for MonthWrapper {
             Err(_) => return Err(param),
             Ok(n) => n,
         };
-        if number > 0 && number < 13 {
-            Ok(MonthWrapper(Month::from(number)))
+        if let Some(m) = Month::from(number) {
+            Ok(MonthWrapper(m))
         } else {
             Err(param)
         }
@@ -50,8 +50,8 @@ impl<'r> FromParam<'r> for FilialWrapper {
             Err(_) => return Err(param),
             Ok(n) => n,
         };
-        if number > 0 && number < 4 {
-            Ok(FilialWrapper(Filial::from(number)))
+        if let Some(f) = Filial::from_u8(number) {
+            Ok(FilialWrapper(f))
         } else {
             Err(param)
         }

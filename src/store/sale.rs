@@ -14,28 +14,24 @@ impl Filial {
             Three => 3,
         }
     }
-}
 
-impl From<&str> for Filial {
-    fn from(s :&str) -> Self {
+    pub fn from_u8(s :u8) -> Option<Self> {
         use self::Filial::*;
         match s {
-            "1" => One,
-            "2" => Two,
-            "3" => Three,
-            _ => panic!("Invalid filial: {}", s),
+            1 => Some(One),
+            2 => Some(Two),
+            3 => Some(Three),
+            _ => None
         }
     }
-}
 
-impl From<u8> for Filial {
-    fn from(s :u8) -> Self {
+    pub fn from_str(s :&str) -> Option<Self> {
         use self::Filial::*;
         match s {
-            1 => One,
-            2 => Two,
-            3 => Three,
-            _ => panic!("Invalid filial: {}", s),
+            "1" => Some(One),
+            "2" => Some(Two),
+            "3" => Some(Three),
+            _ => None,
         }
     }
 }
@@ -63,7 +59,7 @@ impl Sale {
         if price < 0.0 || price > 999.99 {
             None
         } else {
-            let m = Month::from(month);
+            let m = Month::from(month)?;
             Some(Sale { product, client, price, amount, promotion, month: m, filial })
         }
     }

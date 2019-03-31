@@ -15,28 +15,26 @@ pub enum Month {
 }
 
 impl Month {
-    pub fn as_u8(&self) -> u8 {
-        *self as u8
+    pub fn as_u8(self) -> u8 {
+        self as u8
     }
-}
 
-impl From<u8> for Month {
-    fn from(n :u8) -> Self {
+    pub fn from(n :u8) -> Option<Self> {
         use self::Month::*;
         match n {
-            1 => Jan,
-            2 => Fev,
-            3 => Mar,
-            4 => Apr,
-            5 => May,
-            6 => Jun,
-            7 => Jul,
-            8 => Aug,
-            9 => Sep,
-            10 => Out,
-            11 => Nov,
-            12 => Dez,
-            _ => panic!("Invalid month number: {}", n),
+            1 => Some(Jan),
+            2 => Some(Fev),
+            3 => Some(Mar),
+            4 => Some(Apr),
+            5 => Some(May),
+            6 => Some(Jun),
+            7 => Some(Jul),
+            8 => Some(Aug),
+            9 => Some(Sep),
+            10 => Some(Out),
+            11 => Some(Nov),
+            12 => Some(Dez),
+            _ => None,
         }
     }
 }

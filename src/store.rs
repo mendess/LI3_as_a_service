@@ -129,17 +129,17 @@ impl Store {
         }
     }
 
-    pub fn never_bought(&self) -> (usize, Vec<&Product>) {
+    pub fn never_bought(&self) -> Vec<&Product> {
         let never_bought = self.products
             .values()
             .filter(|(_, sold,_,_,_)| !*sold)
             .map(|p| &p.0)
             .collect::<Vec<&Product>>();
         *self.n_non_bought_products.write().unwrap() = Some(never_bought.len());
-        (never_bought.len(), never_bought)
+        never_bought
     }
 
-    pub fn never_bought_filial(&self, filial: Filial) -> (usize, Vec<&Product>) {
+    pub fn never_bought_filial(&self, filial: Filial) -> Vec<&Product> {
         let never_bought = self.products
             .values()
             .filter(|p|
@@ -151,7 +151,7 @@ impl Store {
         .map(|p| &p.0)
             .collect::<Vec<&Product>>();
         *self.n_non_bought_products.write().unwrap() = Some(never_bought.len());
-        (never_bought.len(), never_bought)
+        never_bought
     }
 
     pub fn buyers_in_all_filials(&self) -> Vec<&Client> {

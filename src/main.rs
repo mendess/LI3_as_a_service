@@ -28,7 +28,7 @@ fn main() -> std::io::Result<()> {
     }
     { // 3
         let now = Instant::now();
-        let total_billed = store.total_billed(Month::Out, "CC1684".to_string());
+        let total_billed = store.total_billed(Month::Oct, "CC1684".to_string());
         eprintln!("Query  3: {:?}ms", now.elapsed().as_micros() as f64 / 1000.0);
         if show_output { println!("{}", view::total_billed(total_billed)) };
     }

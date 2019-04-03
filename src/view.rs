@@ -45,7 +45,7 @@ pub fn never_bought_never_purchased(n_buyers: usize, n_products: usize) -> Strin
 // Query 7
 pub fn year_purchases(table: (Vec<u32>, Vec<u32>, Vec<u32>)) -> String {
     let mut response = String::new();
-    response += "       | Jan | Fev | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dez |\n";
+    response += "       | Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec |\n";
     response += "-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+\n";
     response += " One   |";
     for month in table.0.iter() {

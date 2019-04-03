@@ -1,7 +1,7 @@
 #[derive(PartialEq,Eq,PartialOrd,Ord,Debug,Clone,Copy)]
 pub enum Month {
     Jan = 1,
-    Fev = 2,
+    Feb = 2,
     Mar = 3,
     Apr = 4,
     May = 5,
@@ -9,9 +9,9 @@ pub enum Month {
     Jul = 7,
     Aug = 8,
     Sep = 9,
-    Out = 10,
+    Oct = 10,
     Nov = 11,
-    Dez = 12,
+    Dec = 12,
 }
 
 impl Month {
@@ -23,7 +23,7 @@ impl Month {
         use self::Month::*;
         match n {
             1 => Some(Jan),
-            2 => Some(Fev),
+            2 => Some(Feb),
             3 => Some(Mar),
             4 => Some(Apr),
             5 => Some(May),
@@ -31,9 +31,9 @@ impl Month {
             7 => Some(Jul),
             8 => Some(Aug),
             9 => Some(Sep),
-            10 => Some(Out),
+            10 => Some(Oct),
             11 => Some(Nov),
-            12 => Some(Dez),
+            12 => Some(Dec),
             _ => None,
         }
     }

@@ -204,7 +204,7 @@ impl Store {
             .iter()
             .map(|filial| filial.iter()
                  .skip(from.as_u8() as usize - 1)
-                 .take(to.as_u8() as usize - 1)
+                 .take(to.as_u8() as usize - from.as_u8() as usize + 1)
                  .map(|month| {
                      n_sales += month.len();
                      month.iter().fold(0.0, |acc, s| s.total_price() + acc)

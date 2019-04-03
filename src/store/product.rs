@@ -7,9 +7,9 @@ use lazy_static::lazy_static;
 impl Product {
     pub fn new(code: String) -> Option<Self> {
         lazy_static! {
-            static ref re: Regex = Regex::new("...").unwrap();
+            static ref RE: Regex = Regex::new("...").unwrap();
         }
-        if re.is_match(&code) {
+        if RE.is_match(&code) {
             Some(Product(code))
         } else {
             None

@@ -13,9 +13,9 @@ use lazy_static::lazy_static;
 impl Client {
     pub fn new(code: String) -> Option<Self>  {
         lazy_static! {
-            static ref re :Regex = Regex::new(r"[A-Z][1-9]\d{3}").unwrap();
+            static ref RE :Regex = Regex::new(r"[A-Z][1-9]\d{3}").unwrap();
         }
-        if re.is_match(&code) {
+        if RE.is_match(&code) {
             Some(Client{ id: code, purchases: (0,0,0) })
         } else {
             None

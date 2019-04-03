@@ -53,7 +53,7 @@ impl<'r> FromParam<'r> for Filial {
 fn index() -> &'static str {
 "   Welcome to the LI3 API!
     command 2 <leter>
-    command 3 <month> <client>
+    command 3 <month> <product>
     command 4
     command 4 <filial>
     command 5

@@ -28,7 +28,7 @@ fn main() -> std::io::Result<()> {
     }
     { // 3
         let now = Instant::now();
-        let total_billed = store.total_billed(Month::Oct, "CC1684".to_string());
+        let total_billed = store.total_billed(Month::Oct, "CC1684");
         eprintln!("Query  3: {:?}ms", now.elapsed().as_micros() as f64 / 1000.0);
         if show_output { println!("{}", view::total_billed(total_billed)) };
     }
@@ -53,7 +53,7 @@ fn main() -> std::io::Result<()> {
     }
     {//7
         let now = Instant::now();
-        let table = store.year_purchases(String::from("F2916"));
+        let table = store.year_purchases("F2916");
         eprintln!("Query  7: {:?}ms", now.elapsed().as_micros() as f64 / 1000.0);
         if show_output { println!("{}", view::year_purchases(table)) };
     }

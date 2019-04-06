@@ -103,12 +103,12 @@ impl Store {
         self.products.range(start..end).map(|(_,x)| &x.0).collect()
     }
 
-    pub fn total_billed(&self, month: Month, product: String) -> TotalBilled {
+    pub fn total_billed(&self, month: Month, product: &str) -> TotalBilled {
         let billings =
             self.sales.iter()
             .map(|filial| {
                 filial[(month.as_u8() - 1) as usize].iter()
-                    .filter(|x| x.product() == &product)
+                    .filter(|x| x.product() == product)
                     .fold(((0,0.0),(0,0.0)), |(mut n, mut p), s| {
                         if s.promotion() {
                             p.0 += 1; p.1 += s.total_price();
@@ -181,7 +181,7 @@ impl Store {
         }
     }
 
-    pub fn year_purchases(&self, client: String) -> (Vec<u32>, Vec<u32>, Vec<u32>) {
+    pub fn year_purchases(&self, client: &str) -> (Vec<u32>, Vec<u32>, Vec<u32>) {
         let f = |month :&Vec<Sale>| month.iter().filter(|s| s.client() == client).map(|s| s.amount()).sum();
         let v1 = self.sales[0]
             .iter()
@@ -215,12 +215,12 @@ impl Store {
         (n_sales, total_sales)
     }
 
-    pub fn product_buyers(&self, cod: &str, filial: Filial, promotion: bool) -> Vec<&str> {
+    pub fn product_buyers(&self, product: &str, filial: Filial, promotion: bool) -> Vec<&str> {
         use std::collections::HashSet;
         self.sales[filial.as_u8() as usize - 1].iter()
             .flat_map(|v| v.iter())
             .filter(|s| s.promotion() == promotion)
-            .filter(|s| s.product() == cod)
+            .filter(|s| s.product() == product)
             .map(|s| s.client())
             .collect::<HashSet<&str>>()
             .iter().cloned()
@@ -248,8 +248,6 @@ impl Store {
 
     pub fn top_sold_products(&self, n: usize, sort_by_sales: bool) -> Vec<ProductSales> {
         use std::collections::HashMap;
-        use std::time::Instant;
-        let now = Instant::now();
         let mut table :HashMap<&str, ProductSales> = HashMap::new();
         for s in self.sales.iter().flat_map(|x| x.iter()).flat_map(|x| x.iter()) {
             match table.get_mut(s.product()) {
@@ -278,17 +276,13 @@ impl Store {
                 });},
             };
         }
-        println!("{:?}", now.elapsed());
-        let now = Instant::now();
         let mut pss = table.into_iter().map(|ps| ps.1).collect::<Vec<_>>();
         if sort_by_sales {
             pss.sort_unstable_by_key(|ps| -1 * ps.n_sales_total as i32);
         } else {
             pss.sort_unstable_by_key(|ps| -1 * ps.n_sold_total as i32);
         }
-        let a = pss.iter().take(n).cloned().collect();
-        println!("{:?}", now.elapsed());
-        a
+        pss.iter().take(n).cloned().collect()
     }
 
     pub fn top_expense(&self, client: &str) -> (Option<Expense>, Option<Expense>, Option<Expense>) {

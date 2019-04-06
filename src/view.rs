@@ -9,13 +9,13 @@ pub fn list_by_first_letter(prods: Vec<&Product>) -> String {
     for p in prods {
         response += &format!("{}\n", p);
     }
-    response += &format!("TOTAL: {}", total);
+    response += &format!("TOTAL: {}\n", total);
     response
 }
 
 // Query 3
 pub fn total_billed(total_billed: TotalBilled) -> String {
-    format!("{:#?}", total_billed)
+    format!("{:#?}\n", total_billed)
 }
 
 // Query 4
@@ -39,7 +39,7 @@ pub fn buyers_in_all_filials(clients: Vec<&Client>) -> String {
 
 // Query 6
 pub fn never_bought_never_purchased(n_buyers: usize, n_products: usize) -> String {
-    format!("clients: {} | products: {}", n_buyers, n_products)
+    format!("clients: {} | products: {}\n", n_buyers, n_products)
 }
 
 // Query 7
@@ -67,7 +67,7 @@ pub fn year_purchases(table: (Vec<u32>, Vec<u32>, Vec<u32>)) -> String {
 
 // Query 8
 pub fn total_billed_between(billed: (usize, f64)) -> String {
-    format!("{:?}", billed)
+    format!("{:?}\n", billed)
 }
 
 // Query 9
@@ -85,6 +85,7 @@ pub fn top_purchases(prods: Vec<(&Product, u32)>) -> String {
     for p in prods {
         response += &format!("{} : {}", p.0, p.1);
     }
+    response += "\n";
     response
 }
 

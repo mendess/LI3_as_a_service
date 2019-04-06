@@ -80,7 +80,7 @@ fn query2(store: State<Store>, leter: String) -> String {
 #[get("/3/<month>/<client>")]
 fn query3(store: State<Store>, month: Month, client: String) -> String {
     eprintln!("[{:?}] Running query3/{}/{}", Local::now(), month, client);
-    view::total_billed(store.total_billed(month.into(), client))
+    view::total_billed(store.total_billed(month.into(), &client))
 }
 
 #[get("/4")]
@@ -92,7 +92,7 @@ fn query4(store: State<Store>) -> String {
 #[get("/4/<filial>")]
 fn query4_filial(store: State<Store>, filial: Filial) -> String {
     eprintln!("[{:?}] Running query4/{}", Local::now(), filial);
-    view::never_bought(store.never_bought_filial(filial.into()))
+    view::never_bought(store.never_bought_filial(filial))
 }
 
 #[get("/5")]
@@ -112,7 +112,7 @@ fn query6(store: State<Store>) -> String {
 #[get("/7/<client>")]
 fn query7(store: State<Store>, client: String) -> String {
     eprintln!("[{:?}] Running query7/{}", Local::now(), client);
-    view::year_purchases(store.year_purchases(client))
+    view::year_purchases(store.year_purchases(&client))
 }
 
 #[get("/8/<from>/<to>")]
@@ -145,6 +145,65 @@ fn query12(store: State<Store>, client: String) -> String {
     view::top_expense(store.top_expense(&client))
 }
 
+#[get("/master/<leter>/<month1>/<month2>/<product>/<client>/<filial>/<promotion>")]
+fn master(
+    store: State<Store>,
+    leter: String,
+    month1: Month,
+    month2: Month,
+    product: String,
+    client: String,
+    filial: Filial,
+    promotion: bool) -> String {
+    master_full(store, leter, month1, month2, product, client, filial, promotion, 10)
+}
+
+#[get("/master/<leter>/<month1>/<month2>/<product>/<client>/<filial>/<promotion>/<n>")]
+fn master_full(
+    store: State<Store>,
+    leter: String,
+    month1: Month,
+    month2: Month,
+    product: String,
+    client: String,
+    filial: Filial,
+    promotion: bool,
+    n: usize) -> String {
+    eprintln!("[{:?}] Running master query/{}/{}/{}/{}/{}/{}/{}/{}", Local::now(), leter, month1, month2, product, client, filial, promotion, n);
+    let leter = leter.chars().next().unwrap();
+    let mut response = String::new();
+    let separator = |n: u32| {
+        let cardinals = &std::iter::repeat('#').take(10).collect::<String>();
+        format!("{} Query {:2} {}\n", cardinals, n, cardinals)
+    };
+    response += &separator(2);
+    response += &view::list_by_first_letter(store.list_by_first_letter(leter));
+    response += &separator(3);
+    response += &view::total_billed(store.total_billed(month1, &client));
+    response += &separator(4);
+    response += &view::never_bought(store.never_bought());
+    response += &separator(4);
+    response += &view::never_bought(store.never_bought_filial(filial));
+    response += &separator(5);
+    response += &view::buyers_in_all_filials(store.buyers_in_all_filials());
+    let buyers = store.n_buyers_without_purchases();
+    let products = store.n_never_bought();
+    response += &separator(6);
+    response += &view::never_bought_never_purchased(buyers, products);
+    response += &separator(7);
+    response += &view::year_purchases(store.year_purchases(&client));
+    response += &separator(8);
+    response += &view::total_billed_between(store.total_billed_between(month1, month2));
+    response += &separator(9);
+    response += &view::product_buyers(store.product_buyers(&product, filial, promotion));
+    response += &separator(10);
+    response += &view::top_purchases(store.top_purchases(&client, month1));
+    response += &separator(11);
+    response += &view::top_sold_products(store.top_sold_products(n, false));
+    response += &separator(12);
+    response + &view::top_expense(store.top_expense(&client))
+}
+
 #[catch(404)]
 fn catch404(_req: &Request) -> String {
     format!("Not a valid query!")
@@ -156,7 +215,7 @@ fn main() -> std::io::Result<()>{
     parse::load_products("./db/Produtos.txt", &mut store).unwrap();
     parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
     rocket::ignite()
-        .mount("/", routes![index,query2,query3,query4,query4_filial,query5,query6,query7,query8,query9,query10,query11,query12])
+        .mount("/", routes![index,query2,query3,query4,query4_filial,query5,query6,query7,query8,query9,query10,query11,query12,master,master_full])
         .register(catchers![catch404])
         .manage(store)
         .launch();

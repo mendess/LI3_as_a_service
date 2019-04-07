@@ -7,7 +7,7 @@ mod parse;
 mod util;
 mod view;
 
-use crate::store::Store;
+use crate::store::{ Store, product::Product, client::Client };
 use crate::store::sale::Filial;
 use crate::util::Month;
 use rocket::Request;
@@ -49,6 +49,50 @@ impl<'r> FromParam<'r> for Filial {
     }
 }
 
+struct ProductParam(String);
+
+impl<'r> FromParam<'r> for ProductParam {
+    type Error = &'r RawStr;
+
+    fn from_param(param: &'r RawStr) -> Result<Self, Self::Error> {
+        let cod = param.as_str();
+        if let Some(_) = Product::new(cod.to_owned()) {
+            Ok(ProductParam(cod.to_owned()))
+        } else {
+            Err(param)
+        }
+    }
+
+}
+
+impl Into<String> for ProductParam {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+struct ClientParam(String);
+
+impl<'r> FromParam<'r> for ClientParam {
+    type Error = &'r RawStr;
+
+    fn from_param(param: &'r RawStr) -> Result<Self, Self::Error> {
+        let cod = param.as_str();
+        if let Some(_) = Client::new(cod.to_owned()) {
+            Ok(ClientParam(cod.to_owned()))
+        } else {
+            Err(param)
+        }
+    }
+
+}
+
+impl Into<String> for ClientParam {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
 #[get("/")]
 fn index() -> &'static str {
 "   Welcome to the LI3 API!
@@ -77,10 +121,11 @@ fn query2(store: State<Store>, leter: String) -> String {
     view::list_by_first_letter(store.list_by_first_letter(a))
 }
 
-#[get("/3/<month>/<client>")]
-fn query3(store: State<Store>, month: Month, client: String) -> String {
-    eprintln!("[{:?}] Running query3/{}/{}", Local::now(), month, client);
-    view::total_billed(store.total_billed(month.into(), &client))
+#[get("/3/<month>/<product>")]
+fn query3(store: State<Store>, month: Month, product: ProductParam) -> String {
+    let product :String = product.into();
+    eprintln!("[{:?}] Running query3/{}/{}", Local::now(), month, product);
+    view::total_billed(store.total_billed(month.into(), &product))
 }
 
 #[get("/4")]
@@ -110,7 +155,8 @@ fn query6(store: State<Store>) -> String {
 }
 
 #[get("/7/<client>")]
-fn query7(store: State<Store>, client: String) -> String {
+fn query7(store: State<Store>, client: ClientParam) -> String {
+    let client :String = client.into();
     eprintln!("[{:?}] Running query7/{}", Local::now(), client);
     view::year_purchases(store.year_purchases(&client))
 }
@@ -122,13 +168,15 @@ fn query8(store: State<Store>, from: Month, to: Month) -> String {
 }
 
 #[get("/9/<product>/<filial>/<promotion>")]
-fn query9(store: State<Store>, product: String, filial: Filial, promotion: bool) -> String {
+fn query9(store: State<Store>, product: ProductParam, filial: Filial, promotion: bool) -> String {
+    let product :String = product.into();
     eprintln!("[{:?}] Running query9/{}/{}/{}", Local::now(), product, filial, promotion);
     view::product_buyers(store.product_buyers(&product, filial.into(), promotion))
 }
 
 #[get("/10/<client>/<month>")]
-fn query10(store: State<Store>, client: String, month: Month) -> String {
+fn query10(store: State<Store>, client: ClientParam, month: Month) -> String {
+    let client :String = client.into();
     eprintln!("[{:?}] Running query10/{}/{}", Local::now(), client, month);
     view::top_purchases(store.top_purchases(&client, month.into()))
 }
@@ -140,7 +188,8 @@ fn query11(store: State<Store>, n: usize) -> String {
 }
 
 #[get("/12/<client>")]
-fn query12(store: State<Store>, client: String) -> String {
+fn query12(store: State<Store>, client: ClientParam) -> String {
+    let client :String = client.into();
     eprintln!("[{:?}] Running query12/{}", Local::now(), client);
     view::top_expense(store.top_expense(&client))
 }
@@ -151,8 +200,8 @@ fn master(
     leter: String,
     month1: Month,
     month2: Month,
-    product: String,
-    client: String,
+    product: ProductParam,
+    client: ClientParam,
     filial: Filial,
     promotion: bool) -> String {
     master_full(store, leter, month1, month2, product, client, filial, promotion, 10)
@@ -164,11 +213,13 @@ fn master_full(
     leter: String,
     month1: Month,
     month2: Month,
-    product: String,
-    client: String,
+    product: ProductParam,
+    client: ClientParam,
     filial: Filial,
     promotion: bool,
     n: usize) -> String {
+    let client :String = client.into();
+    let product :String = product.into();
     eprintln!("[{:?}] Running master query/{}/{}/{}/{}/{}/{}/{}/{}", Local::now(), leter, month1, month2, product, client, filial, promotion, n);
     let leter = leter.chars().next().unwrap();
     let mut response = String::new();

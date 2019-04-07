@@ -15,7 +15,7 @@ impl Client {
         lazy_static! {
             static ref RE :Regex = Regex::new(r"[A-Z][1-9]\d{3}").unwrap();
         }
-        if RE.is_match(&code) {
+        if RE.is_match_at(&code, 0) && code.len() == 5 {
             Some(Client{ id: code, purchases: (0,0,0) })
         } else {
             None
@@ -37,12 +37,6 @@ impl Client {
 
     pub fn purchases(&self) -> (u32, u32, u32) {
         self.purchases
-    }
-}
-
-impl From<&str> for Client {
-    fn from(s :&str) -> Self {
-        Client{ id: s.into(), purchases: (0,0,0) }
     }
 }
 

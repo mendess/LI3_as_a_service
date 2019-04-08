@@ -80,12 +80,11 @@ pub fn product_buyers(clients: Vec<&str>) -> String {
 }
 
 // Query 10
-pub fn top_purchases(prods: Vec<(&Product, u32)>) -> String {
+pub fn top_purchases(prods: Vec<(&str, u32)>) -> String {
     let mut response = String::new();
     for p in prods {
-        response += &format!("{} : {}", p.0, p.1);
+        response += &format!("{} : {}\n", p.0, p.1);
     }
-    response += "\n";
     response
 }
 

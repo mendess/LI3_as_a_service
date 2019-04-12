@@ -16,6 +16,8 @@ use rocket::request::FromParam;
 use rocket::http::RawStr;
 use chrono::Local;
 
+use std::convert::TryFrom;
+
 
 impl<'r> FromParam<'r> for Month {
     type Error = &'r RawStr;
@@ -25,11 +27,7 @@ impl<'r> FromParam<'r> for Month {
             Err(_) => return Err(param),
             Ok(n) => n,
         };
-        if let Some(m) = Month::from(number) {
-            Ok(m)
-        } else {
-            Err(param)
-        }
+        Month::try_from(number).map_err(|_| param)
     }
 }
 
@@ -41,11 +39,7 @@ impl<'r> FromParam<'r> for Filial {
             Err(_) => return Err(param),
             Ok(n) => n,
         };
-        if let Some(f) = Filial::from_u8(number) {
-            Ok(f)
-        } else {
-            Err(param)
-        }
+        Filial::try_from(number).map_err(|_| param)
     }
 }
 

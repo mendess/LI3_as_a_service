@@ -1,4 +1,5 @@
 use crate::util::Month;
+use std::convert::TryFrom;
 
 #[derive(Debug,Clone,Copy,PartialEq,Eq)]
 pub enum Filial {
@@ -14,24 +15,30 @@ impl Filial {
             Three => 3,
         }
     }
+}
 
-    pub fn from_u8(s :u8) -> Option<Self> {
+impl TryFrom<u8> for Filial {
+    type Error = ();
+    fn try_from(s :u8) -> Result<Self, Self::Error> {
         use self::Filial::*;
         match s {
-            1 => Some(One),
-            2 => Some(Two),
-            3 => Some(Three),
-            _ => None
+            1 => Ok(One),
+            2 => Ok(Two),
+            3 => Ok(Three),
+            _ => Err(())
         }
     }
+}
 
-    pub fn from_str(s :&str) -> Option<Self> {
+impl TryFrom<&str> for Filial {
+    type Error = ();
+    fn try_from(s :&str) -> Result<Self, Self::Error> {
         use self::Filial::*;
         match s {
-            "1" => Some(One),
-            "2" => Some(Two),
-            "3" => Some(Three),
-            _ => None,
+            "1" => Ok(One),
+            "2" => Ok(Two),
+            "3" => Ok(Three),
+            _ => Err(()),
         }
     }
 }
@@ -59,7 +66,7 @@ impl Sale {
         if price < 0.0 || price > 999.99 {
             None
         } else {
-            let m = Month::from(month)?;
+            let m = Month::try_from(month).ok()?;
             Some(Sale { product, client, price, amount, promotion, month: m, filial })
         }
     }

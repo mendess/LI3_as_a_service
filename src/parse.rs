@@ -6,8 +6,8 @@ use crate::store::sale::Filial;
 
 use std::fs::File;
 use std::io::{BufReader, BufRead, Result, Error, ErrorKind};
+use std::convert::TryFrom;
 
-#[allow(dead_code)]
 pub fn load_products(file: &str, store: &mut Store) -> Result<()> {
     let file = BufReader::new(File::open(file)?);
     for line in file.lines().filter_map(|x| x.ok()) {
@@ -18,7 +18,6 @@ pub fn load_products(file: &str, store: &mut Store) -> Result<()> {
     Ok(())
 }
 
-#[allow(dead_code)]
 pub fn load_clients(file: &str, store: &mut Store) -> Result<()> {
     let file = BufReader::new(File::open(file)?);
     for line in file.lines().filter_map(|x| x.ok()) {
@@ -29,7 +28,6 @@ pub fn load_clients(file: &str, store: &mut Store) -> Result<()> {
     Ok(())
 }
 
-#[allow(dead_code)]
 pub fn load_sales(file: &str, store: &mut Store) -> Result<()> {
     let file = BufReader::new(File::open(file)?);
     for line in file.lines().filter_map(|x| x.ok()) {
@@ -40,7 +38,8 @@ pub fn load_sales(file: &str, store: &mut Store) -> Result<()> {
         let sale = l.next().unwrap() == "P";
         let client = l.next().unwrap().into();
         let mes = l.next().map(|x| x.parse::<u8>().unwrap()).unwrap();
-        let filial = Filial::from_str(l.next().unwrap()).ok_or(Error::new(ErrorKind::Other,"Invalid Filial"))?;
+        let filial = Filial::try_from(l.next().unwrap())
+            .map_err(|_| Error::new(ErrorKind::Other,"Invalid Filial"))?;
         if let Some(s) = Sale::new(product, client, preco, quant, sale, mes, filial) {
             store.add_sale(s);
         }

@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 #[derive(PartialEq,Eq,PartialOrd,Ord,Debug,Clone,Copy)]
 pub enum Month {
     Jan = 1,
@@ -19,26 +21,30 @@ impl Month {
         self as u8
     }
 
-    pub fn from(n :u8) -> Option<Self> {
+}
+
+impl TryFrom<u8> for Month {
+    type Error = ();
+
+    fn try_from(n :u8) -> Result<Self, Self::Error> {
         use self::Month::*;
         match n {
-            1 => Some(Jan),
-            2 => Some(Feb),
-            3 => Some(Mar),
-            4 => Some(Apr),
-            5 => Some(May),
-            6 => Some(Jun),
-            7 => Some(Jul),
-            8 => Some(Aug),
-            9 => Some(Sep),
-            10 => Some(Oct),
-            11 => Some(Nov),
-            12 => Some(Dec),
-            _ => None,
+            1 => Ok(Jan),
+            2 => Ok(Feb),
+            3 => Ok(Mar),
+            4 => Ok(Apr),
+            5 => Ok(May),
+            6 => Ok(Jun),
+            7 => Ok(Jul),
+            8 => Ok(Aug),
+            9 => Ok(Sep),
+            10 => Ok(Oct),
+            11 => Ok(Nov),
+            12 => Ok(Dec),
+            _ => Err(()),
         }
     }
 }
-
 impl std::fmt::Display for Month {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.as_u8())

@@ -251,7 +251,8 @@ fn master_full(
 
 #[catch(404)]
 fn catch404(_req: &Request) -> String {
-    format!("Not a valid query!")
+    let police = include_bytes!("../assets/police.txt");
+    format!("{}", String::from_utf8_lossy(police))
 }
 
 fn main() -> std::io::Result<()>{

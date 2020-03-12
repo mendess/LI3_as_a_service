@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-#[derive(PartialEq,Eq,PartialOrd,Ord,Debug,Clone,Copy)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
 pub enum Month {
     Jan = 1,
     Feb = 2,
@@ -20,13 +20,12 @@ impl Month {
     pub fn as_u8(self) -> u8 {
         self as u8
     }
-
 }
 
 impl TryFrom<u8> for Month {
     type Error = ();
 
-    fn try_from(n :u8) -> Result<Self, Self::Error> {
+    fn try_from(n: u8) -> Result<Self, Self::Error> {
         use self::Month::*;
         match n {
             1 => Ok(Jan),

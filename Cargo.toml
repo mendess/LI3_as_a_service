@@ -17,3 +17,6 @@ path = "src/main.rs"
 [[bin]]
 name = "web"
 path = "src/server.rs"
+
+[profile.release]
+codegen-units = 1

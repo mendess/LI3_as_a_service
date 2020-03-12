@@ -1,0 +1,3 @@
+[global]
+log = "normal"
+port = 8001

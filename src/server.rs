@@ -1,23 +1,18 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-mod store;
 mod parse;
+mod store;
 mod util;
 mod view;
 
-use crate::store::{ Store, product::Product, client::Client };
-use crate::store::sale::Filial;
+use crate::store::{client::Client, product::Product, sale::Filial, Store};
 use crate::util::Month;
-use rocket::Request;
-use rocket::State;
-use rocket::request::FromParam;
-use rocket::http::RawStr;
 use chrono::Local;
-
+use rocket::{http::RawStr, request::FromParam, Request, State};
 use std::convert::TryFrom;
-
 
 impl<'r> FromParam<'r> for Month {
     type Error = &'r RawStr;
@@ -56,7 +51,6 @@ impl<'r> FromParam<'r> for ProductParam {
             Err(param)
         }
     }
-
 }
 
 impl Into<String> for ProductParam {
@@ -78,7 +72,6 @@ impl<'r> FromParam<'r> for ClientParam {
             Err(param)
         }
     }
-
 }
 
 impl Into<String> for ClientParam {
@@ -89,7 +82,7 @@ impl Into<String> for ClientParam {
 
 #[get("/")]
 fn index() -> &'static str {
-"   Welcome to the LI3 API!
+    "   Welcome to the LI3 API!
     command 2 <leter>
     command 3 <month> <product>
     command 4
@@ -105,7 +98,7 @@ fn index() -> &'static str {
 
     Notes:
     <promotion> is 'true' or 'false'
-    "
+"
 }
 
 #[get("/2/<leter>")]
@@ -117,7 +110,7 @@ fn query2(store: State<Store>, leter: String) -> String {
 
 #[get("/3/<month>/<product>")]
 fn query3(store: State<Store>, month: Month, product: ProductParam) -> String {
-    let product :String = product.into();
+    let product: String = product.into();
     eprintln!("[{:?}] Running query3/{}/{}", Local::now(), month, product);
     view::total_billed(store.total_billed(month.into(), &product))
 }
@@ -150,7 +143,7 @@ fn query6(store: State<Store>) -> String {
 
 #[get("/7/<client>")]
 fn query7(store: State<Store>, client: ClientParam) -> String {
-    let client :String = client.into();
+    let client: String = client.into();
     eprintln!("[{:?}] Running query7/{}", Local::now(), client);
     view::year_purchases(store.year_purchases(&client))
 }
@@ -163,14 +156,20 @@ fn query8(store: State<Store>, from: Month, to: Month) -> String {
 
 #[get("/9/<product>/<filial>/<promotion>")]
 fn query9(store: State<Store>, product: ProductParam, filial: Filial, promotion: bool) -> String {
-    let product :String = product.into();
-    eprintln!("[{:?}] Running query9/{}/{}/{}", Local::now(), product, filial, promotion);
+    let product: String = product.into();
+    eprintln!(
+        "[{:?}] Running query9/{}/{}/{}",
+        Local::now(),
+        product,
+        filial,
+        promotion
+    );
     view::product_buyers(store.product_buyers(&product, filial.into(), promotion))
 }
 
 #[get("/10/<client>/<month>")]
 fn query10(store: State<Store>, client: ClientParam, month: Month) -> String {
-    let client :String = client.into();
+    let client: String = client.into();
     eprintln!("[{:?}] Running query10/{}/{}", Local::now(), client, month);
     view::top_purchases(store.top_purchases(&client, month.into()))
 }
@@ -183,7 +182,7 @@ fn query11(store: State<Store>, n: usize) -> String {
 
 #[get("/12/<client>")]
 fn query12(store: State<Store>, client: ClientParam) -> String {
-    let client :String = client.into();
+    let client: String = client.into();
     eprintln!("[{:?}] Running query12/{}", Local::now(), client);
     view::top_expense(store.top_expense(&client))
 }
@@ -197,8 +196,11 @@ fn master(
     product: ProductParam,
     client: ClientParam,
     filial: Filial,
-    promotion: bool) -> String {
-    master_full(store, leter, month1, month2, product, client, filial, promotion, 10)
+    promotion: bool,
+) -> String {
+    master_full(
+        store, leter, month1, month2, product, client, filial, promotion, 10,
+    )
 }
 
 #[get("/master/<leter>/<month1>/<month2>/<product>/<client>/<filial>/<promotion>/<n>")]
@@ -211,10 +213,22 @@ fn master_full(
     client: ClientParam,
     filial: Filial,
     promotion: bool,
-    n: usize) -> String {
-    let client :String = client.into();
-    let product :String = product.into();
-    eprintln!("[{:?}] Running master query/{}/{}/{}/{}/{}/{}/{}/{}", Local::now(), leter, month1, month2, product, client, filial, promotion, n);
+    n: usize,
+) -> String {
+    let client: String = client.into();
+    let product: String = product.into();
+    eprintln!(
+        "[{:?}] Running master query/{}/{}/{}/{}/{}/{}/{}/{}",
+        Local::now(),
+        leter,
+        month1,
+        month2,
+        product,
+        client,
+        filial,
+        promotion,
+        n
+    );
     let leter = leter.chars().next().unwrap();
     let mut response = String::new();
     let separator = |n: u32| {
@@ -255,16 +269,34 @@ fn catch404(_req: &Request) -> String {
     format!("{}", String::from_utf8_lossy(police))
 }
 
-fn main() -> std::io::Result<()>{
+fn main() -> std::io::Result<()> {
     let mut store = Store::new();
     parse::load_clients("./db/Clientes.txt", &mut store).unwrap();
     parse::load_products("./db/Produtos.txt", &mut store).unwrap();
     parse::load_sales("./db/Vendas_1M.txt", &mut store).unwrap();
     rocket::ignite()
-        .mount("/", routes![index,query2,query3,query4,query4_filial,query5,query6,query7,query8,query9,query10,query11,query12,master,master_full])
+        .mount(
+            "/",
+            routes![
+                index,
+                query2,
+                query3,
+                query4,
+                query4_filial,
+                query5,
+                query6,
+                query7,
+                query8,
+                query9,
+                query10,
+                query11,
+                query12,
+                master,
+                master_full
+            ],
+        )
         .register(catchers![catch404])
         .manage(store)
         .launch();
     Ok(())
 }
-

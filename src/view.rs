@@ -1,6 +1,6 @@
-use crate::store::{ TotalBilled, ProductSales, Expense };
-use crate::store::product::Product;
 use crate::store::client::Client;
+use crate::store::product::Product;
+use crate::store::{Expense, ProductSales, TotalBilled};
 
 // Query 2
 pub fn list_by_first_letter(prods: Vec<&Product>) -> String {
@@ -45,8 +45,10 @@ pub fn never_bought_never_purchased(n_buyers: usize, n_products: usize) -> Strin
 // Query 7
 pub fn year_purchases(table: (Vec<u32>, Vec<u32>, Vec<u32>)) -> String {
     let mut response = String::new();
-    response += "       | Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec |\n";
-    response += "-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+\n";
+    response +=
+        "       | Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec |\n";
+    response +=
+        "-------+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+\n";
     response += " One   |";
     for month in table.0.iter() {
         response += &format!(" {:3} |", month);
@@ -100,9 +102,14 @@ pub fn top_sold_products(prods: Vec<ProductSales>) -> String {
 // Query 12
 pub fn top_expense(top_expenses: (Option<Expense>, Option<Expense>, Option<Expense>)) -> String {
     let mut response = String::new();
-    if let Some(p) = top_expenses.0 { response += &format!("{}\n", p); }
-    if let Some(p) = top_expenses.1 { response += &format!("{}\n", p); }
-    if let Some(p) = top_expenses.2 { response += &format!("{}\n", p); }
+    if let Some(p) = top_expenses.0 {
+        response += &format!("{}\n", p);
+    }
+    if let Some(p) = top_expenses.1 {
+        response += &format!("{}\n", p);
+    }
+    if let Some(p) = top_expenses.2 {
+        response += &format!("{}\n", p);
+    }
     response
 }
-

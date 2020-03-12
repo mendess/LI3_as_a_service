@@ -1,8 +1,8 @@
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Product(String);
 
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
 
 impl Product {
     pub fn new(code: String) -> Option<Self> {

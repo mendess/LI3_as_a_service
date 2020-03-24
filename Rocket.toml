@@ -1,3 +1,8 @@
 [global]
 log = "normal"
+
+[production]
 port = 8001
+
+[development]
+port = 7001

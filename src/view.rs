@@ -2,6 +2,17 @@ use crate::store::client::Client;
 use crate::store::product::Product;
 use crate::store::{Expense, ProductSales, TotalBilled};
 
+/// Query 1
+pub fn stats(s: (usize, usize, usize)) -> String {
+    format!(
+        "clients: {}
+producs: {}
+sales: {}
+",
+        s.0, s.1, s.2
+    )
+}
+
 // Query 2
 pub fn list_by_first_letter(prods: Vec<&Product>) -> String {
     let mut response = String::new();

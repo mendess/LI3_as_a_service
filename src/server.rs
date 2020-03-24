@@ -83,22 +83,27 @@ impl Into<String> for ClientParam {
 #[get("/")]
 fn index() -> &'static str {
     "   Welcome to the LI3 API!
+    command 1
     command 2 <leter>
     command 3 <month> <product>
-    command 4
+    command 4                                 // All filiais
     command 4 <filial>
     command 5
     command 6
     command 7 <client>
     command 8 <from> <to>
-    command 9 <product> <filial> <promotion>
+    command 9 <product> <filial>              // Joins both
+    command 9 <product> <filial> <promotion = true|false>
     command 10 <client> <month>
     command 11 <n>
     command 12 <client>
-
-    Notes:
-    <promotion> is 'true' or 'false'
 "
+}
+
+#[get("/1")]
+fn query1(store: State<Store>) -> String {
+    eprintln!("[{:?}] Running query1", Local::now());
+    view::stats(store.stats())
 }
 
 #[get("/2/<leter>")]
@@ -137,7 +142,7 @@ fn query5(store: State<Store>) -> String {
 fn query6(store: State<Store>) -> String {
     eprintln!("[{:?}] Running query6", Local::now());
     let buyers = store.n_buyers_without_purchases();
-    let products = store.n_never_bought();
+    let products = store.n_products_never_bought();
     view::never_bought_never_purchased(buyers, products)
 }
 
@@ -152,6 +157,20 @@ fn query7(store: State<Store>, client: ClientParam) -> String {
 fn query8(store: State<Store>, from: Month, to: Month) -> String {
     eprintln!("[{:?}] Running query8/{}/{}", Local::now(), from, to);
     view::total_billed_between(store.total_billed_between(from.into(), to.into()))
+}
+
+#[get("/9/<product>/<filial>")]
+fn query9_full(store: State<Store>, product: ProductParam, filial: Filial) -> String {
+    let product: String = product.into();
+    eprintln!(
+        "[{:?}] Running query9/{}/{}",
+        Local::now(),
+        product,
+        filial,
+    );
+    let mut f = store.product_buyers(&product, filial.into(), false);
+    f.extend(store.product_buyers(&product, filial.into(), true));
+    view::product_buyers(f)
 }
 
 #[get("/9/<product>/<filial>/<promotion>")]
@@ -246,7 +265,7 @@ fn master_full(
     response += &separator(5);
     response += &view::buyers_in_all_filials(store.buyers_in_all_filials());
     let buyers = store.n_buyers_without_purchases();
-    let products = store.n_never_bought();
+    let products = store.n_products_never_bought();
     response += &separator(6);
     response += &view::never_bought_never_purchased(buyers, products);
     response += &separator(7);
@@ -279,6 +298,7 @@ fn main() -> std::io::Result<()> {
             "/",
             routes![
                 index,
+                query1,
                 query2,
                 query3,
                 query4,
@@ -288,6 +308,7 @@ fn main() -> std::io::Result<()> {
                 query7,
                 query8,
                 query9,
+                query9_full,
                 query10,
                 query11,
                 query12,

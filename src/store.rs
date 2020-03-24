@@ -158,6 +158,15 @@ impl Store {
         Ok(())
     }
 
+    /// Query 1
+    pub fn stats(&self) -> (usize, usize, usize) {
+        (
+            self.clients.len(),
+            self.products.len(),
+            self.sales.iter().flatten().map(|v| v.len()).sum(),
+        )
+    }
+
     /// Query 2
     pub fn list_by_first_letter(&self, l: char) -> Vec<&Product> {
         let start = format!("{}{}", l, "A0000").to_uppercase();
@@ -167,6 +176,16 @@ impl Store {
 
     /// Query 3
     pub fn total_billed(&self, month: Month, product: &str) -> TotalBilled {
+        #[derive(Default, Clone, Copy)]
+        struct Billing {
+            count: u32,
+            price: f64,
+        }
+        #[derive(Default, Clone, Copy)]
+        struct FillialBilling {
+            normal: Billing,
+            promotion: Billing,
+        }
         let billings = self
             .sales
             .iter()
@@ -174,15 +193,15 @@ impl Store {
                 filial[(month.as_u8() - 1) as usize]
                     .iter()
                     .filter(|x| x.product() == product)
-                    .fold(((0, 0.0), (0, 0.0)), |(mut n, mut p), s| {
+                    .fold(FillialBilling::default(), |mut fb, s| {
                         if s.promotion() {
-                            p.0 += 1;
-                            p.1 += s.total_price();
+                            fb.promotion.count += 1;
+                            fb.promotion.price += s.total_price();
                         } else {
-                            n.0 += 1;
-                            n.1 += s.total_price();
+                            fb.normal.count += 1;
+                            fb.normal.price += s.total_price();
                         };
-                        (n, p)
+                        fb
                     })
             })
             .collect::<Vec<_>>();
@@ -190,10 +209,10 @@ impl Store {
         let b2 = billings[1];
         let b3 = billings[2];
         TotalBilled {
-            n_sales_n: ((b1.1).0, (b2.1).0, (b3.1).0),
-            n_sales_p: ((b1.0).0, (b2.0).0, (b3.0).0),
-            billed_n: ((b1.1).1, (b2.1).1, (b3.1).1),
-            billed_p: ((b1.0).1, (b2.0).1, (b3.0).1),
+            n_sales_p: (b1.promotion.count, b2.promotion.count, b3.promotion.count),
+            n_sales_n: (b1.normal.count, b2.normal.count, b3.normal.count),
+            billed_p: (b1.promotion.price, b2.promotion.price, b3.promotion.price),
+            billed_n: (b1.normal.price, b2.normal.price, b3.normal.price),
         }
     }
 
@@ -225,23 +244,6 @@ impl Store {
         never_bought
     }
 
-    /// Query 4
-    pub fn n_never_bought(&self) -> usize {
-        match *self.n_non_bought_products.read().unwrap() {
-            Some(n) => n,
-            None => {
-                let n = self
-                    .products
-                    .values()
-                    .filter(|(_, sold, _, _, _)| !*sold)
-                    .map(|p| &p.0)
-                    .count();
-                *self.n_non_bought_products.write().unwrap() = Some(n);
-                n
-            }
-        }
-    }
-
     /// Query 5
     pub fn buyers_in_all_filials(&self) -> Vec<&Client> {
         self.clients
@@ -263,7 +265,22 @@ impl Store {
 
     /// Query 6
     pub fn n_products_never_bought(&self) -> usize {
-        self.products.values().filter(|p| !p.1).count()
+        let lock = self.n_non_bought_products.read().unwrap();
+        let n_never_bought: Option<usize> = *lock;
+        drop(lock);
+        match n_never_bought {
+            Some(n) => n,
+            None => {
+                let n = self
+                    .products
+                    .values()
+                    .filter(|(_, sold, _, _, _)| !*sold)
+                    .map(|p| &p.0)
+                    .count();
+                *self.n_non_bought_products.write().unwrap() = Some(n);
+                n
+            }
+        }
     }
 
     /// Query 7
@@ -293,10 +310,14 @@ impl Store {
                     .skip(from.as_u8() as usize - 1)
                     .take(to.as_u8() as usize - from.as_u8() as usize + 1)
                     .map(|month| {
-                        n_sales += month.len();
-                        month.iter().fold(0.0, |acc, s| s.total_price() + acc)
+                        n_sales += month
+                            .into_iter()
+                            .map(Sale::amount)
+                            .map(|s| s as usize)
+                            .sum::<usize>();
+                        month.into_iter().map(Sale::total_price).sum::<f64>()
                     })
-                    .fold(0.0, |s, acc| s + acc)
+                    .sum::<f64>()
             })
             .sum();
         (n_sales, total_sales)

@@ -76,7 +76,7 @@ fn main() -> std::io::Result<()> {
         // 6
         let now = Instant::now();
         let buyers = store.n_buyers_without_purchases();
-        let products = store.n_never_bought();
+        let products = store.n_products_never_bought();
         eprintln!(
             "Query  6: {:?}ms",
             now.elapsed().as_micros() as f64 / 1000.0

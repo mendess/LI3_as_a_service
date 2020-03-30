@@ -148,7 +148,7 @@ fn main() -> std::io::Result<()> {
     {
         // 12
         let now = Instant::now();
-        let l = store.top_expense("A1234");
+        let l = store.top_expense("A1234", 3);
         eprintln!(
             "Query 12: {:?}ms",
             now.elapsed().as_micros() as f64 / 1000.0

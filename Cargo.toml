@@ -9,6 +9,7 @@ regex = "*"
 lazy_static = "*"
 rocket = "0.4"
 chrono = "*"
+itertools = "*"
 
 [[bin]]
 name = "cli"

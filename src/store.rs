@@ -310,7 +310,7 @@ impl Store {
                     .skip(from.as_u8() as usize - 1)
                     .take(to.as_u8() as usize - from.as_u8() as usize + 1)
                     .map(|month| {
-                        n_sales += month
+                        n_sales += month // array of Sale of this month
                             .into_iter()
                             .map(Sale::amount)
                             .map(|s| s as usize)
@@ -364,24 +364,29 @@ impl Store {
     pub fn top_sold_products(&self, n: usize, sort_by_sales: bool) -> Vec<ProductSales> {
         use std::collections::HashMap;
         let mut table: HashMap<&str, ProductSales> = HashMap::new();
+        let mut client_set: HashMap<&str, Vec<&str>> = HashMap::new();
         for s in self.sales.iter().flatten().flatten() {
             match table.get_mut(s.product()) {
                 Some(ps) => {
-                    ps.n_buyers += 1;
-                    if s.filial() == Filial::One {
-                        ps.n_sold_f1 += s.amount()
-                    };
-                    if s.filial() == Filial::Two {
-                        ps.n_sold_f2 += s.amount()
-                    };
-                    if s.filial() == Filial::Three {
-                        ps.n_sold_f3 += s.amount()
-                    };
-                    ps.n_sold_total += s.amount();
-                    ps.n_sales_f1 += (s.filial() == Filial::One) as u32;
-                    ps.n_sales_f2 += (s.filial() == Filial::Two) as u32;
-                    ps.n_sales_f3 += (s.filial() == Filial::Three) as u32;
-                    ps.n_sales_total += 1;
+                    let cs = client_set.get_mut(s.product()).unwrap();
+                    if !cs.contains(&s.client()) {
+                        ps.n_buyers += 1;
+                        if s.filial() == Filial::One {
+                            ps.n_sold_f1 += s.amount()
+                        };
+                        if s.filial() == Filial::Two {
+                            ps.n_sold_f2 += s.amount()
+                        };
+                        if s.filial() == Filial::Three {
+                            ps.n_sold_f3 += s.amount()
+                        };
+                        ps.n_sold_total += s.amount();
+                        ps.n_sales_f1 += (s.filial() == Filial::One) as u32;
+                        ps.n_sales_f2 += (s.filial() == Filial::Two) as u32;
+                        ps.n_sales_f3 += (s.filial() == Filial::Three) as u32;
+                        ps.n_sales_total += 1;
+                        cs.push(s.client());
+                    }
                 }
                 None => {
                     table.insert(
@@ -411,6 +416,7 @@ impl Store {
                             n_sales_total: 1,
                         },
                     );
+                    client_set.insert(s.product(), vec![s.client()]);
                 }
             };
         }
@@ -424,7 +430,7 @@ impl Store {
     }
 
     /// Query 12
-    pub fn top_expense(&self, client: &str) -> (Option<Expense>, Option<Expense>, Option<Expense>) {
+    pub fn top_expense(&self, client: &str, n: usize) -> Vec<Expense> {
         use std::collections::{BinaryHeap, HashMap};
         let mut products: HashMap<&str, f64> = HashMap::new();
         self.sales
@@ -442,10 +448,12 @@ impl Store {
             .into_iter()
             .map(|(prod, total)| Expense(total, prod))
             .collect::<BinaryHeap<_>>();
-        let p1 = heap.pop().map(|e| e);
-        let p2 = heap.pop().map(|e| e);
-        let p3 = heap.pop().map(|e| e);
-        (p1, p2, p3)
+        let mut ps = Vec::with_capacity(n);
+        while let Some(p) = heap.pop() {
+            if ps.len() == n { break }
+            ps.push(p);
+        }
+        ps
     }
 }
 

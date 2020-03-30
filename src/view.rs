@@ -1,6 +1,7 @@
 use crate::store::client::Client;
 use crate::store::product::Product;
 use crate::store::{Expense, ProductSales, TotalBilled};
+use itertools::Itertools;
 
 /// Query 1
 pub fn stats(s: (usize, usize, usize)) -> String {
@@ -105,22 +106,14 @@ pub fn top_purchases(prods: Vec<(&str, u32)>) -> String {
 pub fn top_sold_products(prods: Vec<ProductSales>) -> String {
     let mut response = String::new();
     for p in prods {
-        response += &format!("{:?}\n", p);
+        response += &format!("{:#?}\n", p);
     }
     response
 }
 
 // Query 12
-pub fn top_expense(top_expenses: (Option<Expense>, Option<Expense>, Option<Expense>)) -> String {
-    let mut response = String::new();
-    if let Some(p) = top_expenses.0 {
-        response += &format!("{}\n", p);
-    }
-    if let Some(p) = top_expenses.1 {
-        response += &format!("{}\n", p);
-    }
-    if let Some(p) = top_expenses.2 {
-        response += &format!("{}\n", p);
-    }
-    response
+pub fn top_expense(top_expenses: Vec<Expense>) -> String {
+    top_expenses.iter()
+        .format("\n")
+        .to_string()
 }

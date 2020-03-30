@@ -96,7 +96,7 @@ fn index() -> &'static str {
     command 9 <product> <filial> <promotion = true|false>
     command 10 <client> <month>
     command 11 <n>
-    command 12 <client>
+    command 12 <client> <n>
 "
 }
 
@@ -199,11 +199,11 @@ fn query11(store: State<Store>, n: usize) -> String {
     view::top_sold_products(store.top_sold_products(n, false))
 }
 
-#[get("/12/<client>")]
-fn query12(store: State<Store>, client: ClientParam) -> String {
+#[get("/12/<client>/<n>")]
+fn query12(store: State<Store>, client: ClientParam, n: usize) -> String {
     let client: String = client.into();
     eprintln!("[{:?}] Running query12/{}", Local::now(), client);
-    view::top_expense(store.top_expense(&client))
+    view::top_expense(store.top_expense(&client, n))
 }
 
 #[get("/master/<leter>/<month1>/<month2>/<product>/<client>/<filial>/<promotion>")]
@@ -279,7 +279,7 @@ fn master_full(
     response += &separator(11);
     response += &view::top_sold_products(store.top_sold_products(n, false));
     response += &separator(12);
-    response + &view::top_expense(store.top_expense(&client))
+    response + &view::top_expense(store.top_expense(&client, n))
 }
 
 #[catch(404)]

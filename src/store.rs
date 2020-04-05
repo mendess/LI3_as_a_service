@@ -265,9 +265,7 @@ impl Store {
 
     /// Query 6
     pub fn n_products_never_bought(&self) -> usize {
-        let lock = self.n_non_bought_products.read().unwrap();
-        let n_never_bought: Option<usize> = *lock;
-        drop(lock);
+        let n_never_bought: Option<usize> = { *self.n_non_bought_products.read().unwrap() };
         match n_never_bought {
             Some(n) => n,
             None => {
@@ -299,28 +297,23 @@ impl Store {
     }
 
     /// Query 8
-    pub fn total_billed_between(&self, from: Month, to: Month) -> (usize, f64) {
-        let mut n_sales = 0;
-        let total_sales = self
-            .sales
-            .iter()
-            .map(|filial| {
-                filial
-                    .iter()
-                    .skip(from.as_u8() as usize - 1)
-                    .take(to.as_u8() as usize - from.as_u8() as usize + 1)
-                    .map(|month| {
-                        n_sales += month // array of Sale of this month
-                            .into_iter()
-                            .map(Sale::amount)
-                            .map(|s| s as usize)
-                            .sum::<usize>();
-                        month.into_iter().map(Sale::total_price).sum::<f64>()
-                    })
-                    .sum::<f64>()
-            })
-            .sum();
-        (n_sales, total_sales)
+    pub fn total_billed_between(&self, from: Month, to: Month) -> Query8 {
+        self.sales.iter().fold(Query8::default(), |acc, filial| {
+            filial
+                .iter()
+                .skip(from.as_u8() as usize - 1)
+                .take(to.as_u8() as usize - from.as_u8() as usize + 1)
+                .fold(acc, |mut acc, month| {
+                    acc.num_items_sold += month // array of Sale of this month
+                        .into_iter()
+                        .map(Sale::amount)
+                        .map(|s| s as usize)
+                        .sum::<usize>();
+                    acc.num_sales += month.len();
+                    acc.total_dolla_dolla += month.into_iter().map(Sale::total_price).sum::<f64>();
+                    acc
+                })
+        })
     }
 
     /// Query 9
@@ -450,11 +443,20 @@ impl Store {
             .collect::<BinaryHeap<_>>();
         let mut ps = Vec::with_capacity(n);
         while let Some(p) = heap.pop() {
-            if ps.len() == n { break }
+            if ps.len() == n {
+                break;
+            }
             ps.push(p);
         }
         ps
     }
+}
+
+#[derive(Default, Debug)]
+pub struct Query8 {
+    num_sales: usize,
+    num_items_sold: usize,
+    total_dolla_dolla: f64,
 }
 
 // N mais vendidos

@@ -1,6 +1,6 @@
 use crate::store::client::Client;
 use crate::store::product::Product;
-use crate::store::{Expense, ProductSales, TotalBilled};
+use crate::store::{Query8, Expense, ProductSales, TotalBilled};
 use itertools::Itertools;
 
 /// Query 1
@@ -80,8 +80,8 @@ pub fn year_purchases(table: (Vec<u32>, Vec<u32>, Vec<u32>)) -> String {
 }
 
 // Query 8
-pub fn total_billed_between(billed: (usize, f64)) -> String {
-    format!("{:?}\n", billed)
+pub fn total_billed_between(billed: Query8) -> String {
+    format!("{:#?}\n", billed)
 }
 
 // Query 9

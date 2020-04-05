@@ -240,7 +240,6 @@ impl Store {
             })
             .map(|p| &p.0)
             .collect::<Vec<&Product>>();
-        *self.n_non_bought_products.write().unwrap() = Some(never_bought.len());
         never_bought
     }
 
